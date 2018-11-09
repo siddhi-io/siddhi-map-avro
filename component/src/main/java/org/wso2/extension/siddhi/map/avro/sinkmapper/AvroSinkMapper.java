@@ -84,7 +84,6 @@ public class AvroSinkMapper extends SinkMapper {
     private String[] attributeNameArray;
     private Schema schema;
 
-
     /**
      * Initialize the mapper and the mapping configurations.
      *

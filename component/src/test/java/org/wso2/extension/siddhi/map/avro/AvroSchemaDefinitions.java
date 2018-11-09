@@ -81,10 +81,6 @@ public class AvroSchemaDefinitions {
             "\"user\",\"fields\":[{\"name\":\"name\",\"type\":\"string\"}," +
             "{\"name\":\"favorite_number\",\"type\":[\"int\", \"null\"]}]}}";
 
-
-    private static String addressSchema = "{\"type\":\"record\",\"name\":\"addressField\",\"fields\":[" +
-            "{\"name\":\"street\",\"type\":\"string\"},{\"name\":\"city\",\"type\":\"string\"}]}";
-
     private static String complexAddressSchema = "{\"type\":\"record\",\"name\":\"addressField\",\"fields\":[" +
             "{\"name\":\"street\",\"type\":\"string\"},{\"name\":\"country\",\"type\":{\"type\":\"record\",\n" +
             "                                           \"name\":\"countryField\",\n" +
@@ -98,8 +94,6 @@ public class AvroSchemaDefinitions {
             "                                   {\"name\":\"city\",\"type\":\"string\"},\n" +
             "                                   {\"name\":\"country\",\"type\": \"string\"}] \n" +
             "                    }";
-
-
 
     public static byte[] createSimpleAvroMessage() {
         schema = new Schema.Parser().
@@ -129,7 +123,6 @@ public class AvroSchemaDefinitions {
 
         return serializeAvroRecord(complexUser, complexSchema);
     }
-
 
     public static byte[] createArrayOfAvroMessage() {
         schema = new Schema.Parser().
