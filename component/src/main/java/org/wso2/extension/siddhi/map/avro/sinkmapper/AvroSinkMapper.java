@@ -186,7 +186,7 @@ public class AvroSinkMapper extends SinkMapper {
             attributeName = attributeNameArray[i];
             attributeValue = data[i];
             if (attributeValue != null) {
-                if (attributeValue.getClass() == String.class) {
+                if (attributeValue instanceof String) {
                     innerParentObject.addProperty(attributeName, attributeValue.toString());
                 } else if (attributeValue instanceof Number) {
                     innerParentObject.addProperty(attributeName, (Number) attributeValue);
