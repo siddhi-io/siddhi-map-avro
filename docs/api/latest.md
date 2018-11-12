@@ -4,7 +4,7 @@
 
 ### avro *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sink-mapper">(Sink Mapper)</a>*
 
-<p style="word-wrap: break-word">This extension is an Event to Avro output mapper. <br>Transports that publish  messages to Avro sink can utilize this extensionto convert Siddhi events to Avro messages. <br>User should specify the avro schema in stream definition.<br></p>
+<p style="word-wrap: break-word">This extension is an Event to Avro output mapper. <br>Transports that publish  messages to Avro sink can utilize this extension to convert Siddhi events to Avro messages. <br>User should specify the avro schema in stream definition.<br></p>
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
@@ -43,7 +43,7 @@ define stream stockStream (symbol string, price float, volume long);
 
 ### avro *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source-mapper">(Source Mapper)</a>*
 
-<p style="word-wrap: break-word">Avro to Event input mapper. Transports which accepts Avro messages can utilize this extensionto convert the incoming Avro message to Siddhi event. Users should specify the avro schema used to create avro message as a parameter in stream definition. The specified avro schema is used convert the avro message into siddhi event.</p>
+<p style="word-wrap: break-word">Avro to Event input mapper. Transports which accepts Avro messages can utilize this extension to convert the incoming Avro message to Siddhi event. Users should specify the avro schema used to create avro message as a parameter in stream definition. <br>The specified avro schema is used to convert the avro message into siddhi event.</p>
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
