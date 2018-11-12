@@ -18,7 +18,6 @@
 package org.wso2.extension.siddhi.map.avro.sinkmapper;
 
 import org.apache.avro.generic.GenericRecord;
-
 import org.apache.log4j.Appender;
 import org.apache.log4j.Layout;
 import org.apache.log4j.Logger;
@@ -42,7 +41,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class AvroSinkMapperTestCase {
-    private static Logger log = Logger.getLogger(AvroSinkMapperTestCase.class.getName());
+    private static Logger log = Logger.getLogger(AvroSinkMapperTestCase.class);
     private AtomicInteger count = new AtomicInteger();
     private boolean eventArrived;
 

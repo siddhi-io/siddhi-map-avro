@@ -32,7 +32,7 @@ import java.io.IOException;
 
 public class AvroSchemaDefinitions {
 
-    private static Logger log = Logger.getLogger(AvroSchemaDefinitions.class.getName());
+    private static Logger log = Logger.getLogger(AvroSchemaDefinitions.class);
     private static GenericRecord user;
     private static GenericRecord complexUser;
     private static GenericArray arrayOfUsers;
