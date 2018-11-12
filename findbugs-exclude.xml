@@ -17,4 +17,17 @@
   ~ under the License.
   -->
 
-<FindBugsFilter></FindBugsFilter>
+<FindBugsFilter>
+    <Match>
+        <Class name="org.wso2.extension.siddhi.map.avro.sinkmapper.AvroSinkMapper" />
+        <Bug pattern="PZLA_PREFER_ZERO_LENGTH_ARRAYS" />
+    </Match>
+    <Match>
+        <Class name="org.wso2.extension.siddhi.map.avro.util.AvroMessageProcessor" />
+        <Bug pattern="PZLA_PREFER_ZERO_LENGTH_ARRAYS" />
+    </Match>
+    <Match>
+        <Class name="org.wso2.extension.siddhi.map.avro.sourcemapper.AvroSourceMapper" />
+        <Bug pattern="PZLA_PREFER_ZERO_LENGTH_ARRAYS" />
+    </Match>
+</FindBugsFilter>

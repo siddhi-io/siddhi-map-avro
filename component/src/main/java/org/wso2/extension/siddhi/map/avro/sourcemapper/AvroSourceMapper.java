@@ -148,7 +148,7 @@ public class AvroSourceMapper extends SourceMapper {
                     " to Siddhi Event", t);
         }
 
-        if (convertedEvent != null && convertedEvent.length > 0) {
+        if (convertedEvent != null) {
             inputEventHandler.sendEvents(convertedEvent);
         }
     }
@@ -185,9 +185,11 @@ public class AvroSourceMapper extends SourceMapper {
             log.error("Event object is invalid. Expected Byte Array, but found "
                     + eventObject.getClass().getCanonicalName());
         }
-        return new Event[0];
+        return null;
     }
 
+    //The method returns a null instead of a byte[0] to enhance the performance.
+    //Creation of empty byte array and length > 0 check for each event conversion is costly
     private Event[] convertToEventArrayForDefaultMapping(String avroMessage) {
         Gson gson = new Gson();
         List<Event> eventList = new ArrayList<>();
@@ -199,14 +201,20 @@ public class AvroSourceMapper extends SourceMapper {
                 continue;
             } else {
                 Event[] event = convertToSingleEventForDefaultMapping(jsonEvent.toString());
-                if (event.length > 0) {
+                if (event != null) {
                     eventList.add(event[0]);
                 }
             }
         }
-        return eventList.toArray(new Event[0]);
+        if (!eventList.isEmpty()) {
+            return eventList.toArray(new Event[0]);
+        } else {
+            return null;
+        }
     }
 
+    //The method returns a null instead of a byte[0] to enhance the performance.
+    //Creation of empty byte array and length > 0 check for each event conversion is costly
     private Event[] convertToSingleEventForDefaultMapping(String avroMessage)  {
         List<Event> eventList = new ArrayList<>();
         Event event = new Event(streamAttributesSize);
@@ -237,7 +245,7 @@ public class AvroSourceMapper extends SourceMapper {
                                 "\", but the received event " + avroMessage +
                                 " does. Hence dropping the message." +
                                 " Check whether the avro message is in a correct format for default mapping.");
-                        return new Event[0];
+                        return null;
                     }
                     jsonToken = parser.nextToken();
                     Attribute.Type type = streamAttributes.get(position).getType();
@@ -254,7 +262,7 @@ public class AvroSourceMapper extends SourceMapper {
                                             " contains incompatible attribute types and values. Value " +
                                             parser.getText() + " is not compatible with type BOOL. " +
                                             "Hence dropping the message.");
-                                    return new Event[0];
+                                    return null;
                                 }
                                 break;
                             case INT:
@@ -265,7 +273,7 @@ public class AvroSourceMapper extends SourceMapper {
                                             " contains incompatible attribute types and values. Value " +
                                             parser.getText() + " is not compatible with type INT. " +
                                             "Hence dropping the message.");
-                                    return new Event[0];
+                                    return null;
                                 }
                                 break;
                             case DOUBLE:
@@ -276,7 +284,7 @@ public class AvroSourceMapper extends SourceMapper {
                                             " contains incompatible attribute types and values. Value " +
                                             parser.getText() + " is not compatible with type DOUBLE. " +
                                             "Hence dropping the message.");
-                                    return new Event[0];
+                                    return null;
                                 }
                                 break;
                             case STRING:
@@ -292,7 +300,7 @@ public class AvroSourceMapper extends SourceMapper {
                                             " contains incompatible attribute types and values. Value " +
                                             parser.getText() + " is not compatible with type FLOAT. " +
                                             "Hence dropping the message.");
-                                    return new Event[0];
+                                    return null;
                                 }
                                 break;
                             case LONG:
@@ -303,7 +311,7 @@ public class AvroSourceMapper extends SourceMapper {
                                             " contains incompatible attribute types and values. Value " +
                                             parser.getText() + " is not compatible with type LONG. " +
                                             "Hence dropping the message.");
-                                    return new Event[0];
+                                    return null;
                                 }
                                 break;
                             case OBJECT:
@@ -329,17 +337,17 @@ public class AvroSourceMapper extends SourceMapper {
                                         data[position] = parser.getValueAsBoolean();
                                         break;
                                     default:
-                                        return new Event[0];
+                                        return null;
                                 }
                                 break;
                             default:
-                                return new Event[0];
+                                return null;
                         }
                     }
                 }
             } catch (IOException e) {
                 log.error ("Avro message " + avroMessage + " cannot be converted to siddhi event.");
-                return new Event[0];
+                return null;
             }
         }
         eventList.add(event);
