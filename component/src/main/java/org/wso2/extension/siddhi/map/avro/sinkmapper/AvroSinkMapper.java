@@ -115,7 +115,8 @@ public class AvroSinkMapper extends SinkMapper {
         if (schemaDefinition != null) {
             return new Schema.Parser().parse(schemaDefinition);
         } else {
-            throw new SiddhiAppCreationException("Avro Schema is not specified in the stream definition." + streamName);
+            throw new SiddhiAppCreationException("Avro Schema is not specified in the stream definition. "
+                    + streamName);
         }
     }
 
@@ -138,7 +139,7 @@ public class AvroSinkMapper extends SinkMapper {
         if (payloadTemplateBuilderMap == null) {
             data = constructAvroForDefaultMapping(event);
         }
-        if (data != null && data.length > 0) {
+        if (data != null) {
             sinkListener.publish(data);
         }
     }
@@ -147,13 +148,15 @@ public class AvroSinkMapper extends SinkMapper {
         List<byte[]> convertedEvents = new ArrayList<>();
             for (Event event: eventObj) {
                 byte[] convertedEvent = constructAvroForDefaultMapping(event);
-                if (convertedEvent != null && convertedEvent.length > 0) {
+                if (convertedEvent != null) {
                     convertedEvents.add(convertedEvent);
                 }
             }
             return convertedEvents;
     }
 
+    //The method returns a null instead of a byte[0] to enhance the performance.
+    //Creation of empty byte array and length > 0 check for each event conversion is costly
     private byte[] constructAvroForDefaultMapping(Object eventObj) {
         byte[] convertedEvent = null;
 
@@ -171,7 +174,7 @@ public class AvroSinkMapper extends SinkMapper {
         } else {
             log.error("Invalid object type. " + eventObj.toString() + " of type " + eventObj.getClass().getName() +
                     " cannot be converted to an Avro Message");
-            return new byte[0];
+            return null;
         }
     }
 

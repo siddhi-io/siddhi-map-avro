@@ -55,7 +55,7 @@ public class AvroMessageProcessor {
         } catch (IOException e) {
             log.error("IOException occured when serializing event " + jsonString +
                     " to avro message of schema " + schema.toString());
-            return new byte[0];
+            return null;
         }
     }
 
