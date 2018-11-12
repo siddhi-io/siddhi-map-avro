@@ -126,7 +126,8 @@ public class AvroSourceMapper extends SourceMapper {
         if (schemaDefinition != null) {
             return new Schema.Parser().parse(schemaDefinition);
         } else {
-            throw new SiddhiAppCreationException("Avro Schema is not specified in the stream definition." + streamName);
+            throw new SiddhiAppCreationException("Avro Schema is not specified in the stream definition. "
+                    + streamName);
         }
     }
 

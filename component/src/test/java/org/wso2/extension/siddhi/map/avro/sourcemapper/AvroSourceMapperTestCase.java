@@ -43,10 +43,12 @@ public class AvroSourceMapperTestCase {
     private static Logger log = Logger.getLogger(AvroSourceMapperTestCase.class.getName());
     private AtomicInteger count = new AtomicInteger();
     private volatile boolean eventArrived;
+    private boolean innerAssertionsPass;
 
     @BeforeMethod
     public void init() {
         eventArrived = false;
+        innerAssertionsPass = false;
         count.set(0);
     }
 
@@ -79,6 +81,8 @@ public class AvroSourceMapperTestCase {
                 count.addAndGet(events.length);
                 EventPrinter.print(events);
                 AssertJUnit.assertEquals("WSO2", events[0].getData(0));
+                AssertJUnit.assertEquals(null, events[0].getData(1));
+                innerAssertionsPass = true;
             }
         });
 
@@ -88,6 +92,7 @@ public class AvroSourceMapperTestCase {
         siddhiAppRuntime.shutdown();
 
         AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(innerAssertionsPass);
         AssertJUnit.assertEquals(1, count.get());
     }
 
@@ -131,6 +136,9 @@ public class AvroSourceMapperTestCase {
                 count.addAndGet(events.length);
                 EventPrinter.print(events);
                 AssertJUnit.assertEquals("WSO2", events[0].getData(0));
+                AssertJUnit.assertEquals("{street=Palm Grove, city={city=Colombo, country=SriLanka}}",
+                        events[0].getData(1).toString());
+                innerAssertionsPass = true;
             }
         });
 
@@ -141,6 +149,7 @@ public class AvroSourceMapperTestCase {
         siddhiAppRuntime.shutdown();
 
         AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(innerAssertionsPass);
         AssertJUnit.assertEquals(1, count.get());
     }
 
@@ -168,7 +177,10 @@ public class AvroSourceMapperTestCase {
                 count.addAndGet(events.length);
                 EventPrinter.print(events);
                 AssertJUnit.assertEquals("WSO2", events[0].getData(0));
+                AssertJUnit.assertEquals(null, events[0].getData(1));
                 AssertJUnit.assertEquals("IBM", events[1].getData(0));
+                AssertJUnit.assertEquals(100, events[1].getData(1));
+                innerAssertionsPass = true;
 
             }
         });
@@ -179,6 +191,7 @@ public class AvroSourceMapperTestCase {
         siddhiAppRuntime.shutdown();
 
         AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(innerAssertionsPass);
         AssertJUnit.assertEquals(2, count.get());
     }
 
@@ -218,6 +231,9 @@ public class AvroSourceMapperTestCase {
                         count.addAndGet(events.length);
                         AssertJUnit.assertEquals("WSO2", event.getData(0));
                         AssertJUnit.assertEquals(20.5f, event.getData(1));
+                        AssertJUnit.assertEquals(40.42, event.getData(2));
+                        AssertJUnit.assertTrue((boolean) event.getData(3));
+                        innerAssertionsPass = true;
                     }
                 }
             });
@@ -228,6 +244,8 @@ public class AvroSourceMapperTestCase {
             KafkaTestUtil.deleteTopic(topics);
             siddhiAppRuntime.shutdown();
 
+            AssertJUnit.assertTrue(eventArrived);
+            AssertJUnit.assertTrue(innerAssertionsPass);
             AssertJUnit.assertEquals(1, count.get());
         } catch (ZkTimeoutException ex) {
             log.warn("No zookeeper may not be available.", ex);

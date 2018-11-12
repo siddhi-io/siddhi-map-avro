@@ -31,6 +31,7 @@ import org.wso2.extension.siddhi.map.avro.util.AvroMessageProcessor;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.transport.InMemoryBroker;
 
@@ -44,11 +45,13 @@ public class AvroSinkMapperTestCase {
     private static Logger log = Logger.getLogger(AvroSinkMapperTestCase.class);
     private AtomicInteger count = new AtomicInteger();
     private boolean eventArrived;
+    private boolean innerAssertionsPass;
 
     @BeforeMethod
     public void init() {
         count.set(0);
         eventArrived = false;
+        innerAssertionsPass = false;
     }
 
     @Test(description = "Check Avro sink maps output siddhi events to " +
@@ -86,9 +89,11 @@ public class AvroSinkMapperTestCase {
                     switch (count.get()) {
                         case 1:
                             AssertJUnit.assertEquals("WSO2", ((GenericRecord) events).get("name").toString());
+                            innerAssertionsPass = true;
                             break;
                         case 2:
                             AssertJUnit.assertEquals("IBM", ((GenericRecord) events).get("name").toString());
+                            innerAssertionsPass = true;
                             break;
                         default:
                             AssertJUnit.fail();
@@ -112,6 +117,7 @@ public class AvroSinkMapperTestCase {
         siddhiAppRuntime.shutdown();
 
         AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(innerAssertionsPass);
         AssertJUnit.assertEquals(2, count.get());
     }
 
@@ -158,7 +164,12 @@ public class AvroSinkMapperTestCase {
                     log.info(events);
                     eventArrived = true;
                     count.getAndIncrement();
+                    Object address = ((GenericRecord) events).get("address");
+                    Object country = ((GenericRecord) address).get("country");
                     AssertJUnit.assertEquals("WSO2", ((GenericRecord) events).get("username").toString());
+                    AssertJUnit.assertEquals("Palm Grove", ((GenericRecord) address).get("street").toString());
+                    AssertJUnit.assertEquals("SriLanka", ((GenericRecord) country).get("country").toString());
+                    innerAssertionsPass = true;
                 }
             }
 
@@ -184,6 +195,7 @@ public class AvroSinkMapperTestCase {
         siddhiAppRuntime.shutdown();
 
         AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(innerAssertionsPass);
         AssertJUnit.assertEquals(1, count.get());
     }
 
@@ -326,8 +338,7 @@ public class AvroSinkMapperTestCase {
             @Override
             public void onMessage(Object obj) {
                 if (obj instanceof List) {
-                    List<byte[]> events = ((List) obj);
-                    for (byte[] event : events) {
+                    for (byte[] event : (List<byte[]>) obj) {
                         Object message = AvroMessageProcessor.deserializeByteArray(event,
                                 AvroSchemaDefinitions.getFlatSchema());
                             log.info(message);
@@ -336,9 +347,11 @@ public class AvroSinkMapperTestCase {
                             switch (count.get()) {
                                 case 1:
                                     AssertJUnit.assertEquals("WSO2", ((GenericRecord) message).get("name").toString());
+                                    innerAssertionsPass = true;
                                     break;
                                 case 2:
                                     AssertJUnit.assertEquals("IBM", ((GenericRecord) message).get("name").toString());
+                                    innerAssertionsPass = true;
                                     break;
                                 default:
                                     AssertJUnit.fail();
@@ -364,8 +377,34 @@ public class AvroSinkMapperTestCase {
         siddhiAppRuntime.start();
         fooStream.send(multipleEvents);
 
+        AssertJUnit.assertTrue(innerAssertionsPass);
         AssertJUnit.assertEquals(2, count.get());
         InMemoryBroker.unsubscribe(subscriber);
         siddhiAppRuntime.shutdown();
+    }
+
+    @Test(description = "Check siddhi app creation fails when stream " +
+            "definition does not contain schema definition", expectedExceptions = SiddhiAppCreationException.class)
+    public void avroSinkMapperTest6() throws InterruptedException {
+        log.info("Testing Avro Sink Mapper without schema definition");
+        String streams = "" +
+                "@App:name('TestApp')" +
+                "define stream FooStream (name string, favorite_number int); " +
+                "@sink(type='inMemory', topic='user', @map(type='avro'))" +
+                "define stream BarStream (name string); ";
+        String query = "" +
+                "from FooStream " +
+                "select name " +
+                "insert into BarStream; ";
+        SiddhiManager siddhiManager = new SiddhiManager();
+        SiddhiAppRuntime siddhiAppRuntime = null;
+        try {
+           siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        } catch (SiddhiAppCreationException e) {
+            AssertJUnit.assertEquals("Error on 'TestApp' @ Line: 1. Position: 135, near " +
+                    "'@sink(type='inMemory', topic='user', @map(type='avro'))'. " +
+                    "Avro Schema is not specified in the stream definition. BarStream", e.getMessage());
+            throw e;
+        }
     }
 }
