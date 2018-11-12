@@ -50,7 +50,7 @@ import java.util.Map;
         namespace = "sinkMapper",
         description = "" +
                 "This extension is an Event to Avro output mapper. \n" +
-                "Transports that publish  messages to Avro sink can utilize this extension" +
+                "Transports that publish  messages to Avro sink can utilize this extension " +
                 "to convert Siddhi events to " +
                 "Avro messages. \n" +
                 "User should specify the avro schema in stream definition.\n",
@@ -108,26 +108,25 @@ public class AvroSinkMapper extends SinkMapper {
         }
         schema = getAvroSchema (optionHolder.validateAndGetStaticValue(DEFAULT_AVRO_MAPPING_PREFIX.concat(".").
                         concat(SCHEMA_IDENTIFIER),
-                null));
+                null), streamDefinition.getId());
     }
 
-    private Schema getAvroSchema(String schemaDefinition) {
+    private Schema getAvroSchema(String schemaDefinition, String streamName) {
         if (schemaDefinition != null) {
             return new Schema.Parser().parse(schemaDefinition);
         } else {
-            log.error("Avro Schema is not specified in the stream definition");
-            return null;
+            throw new SiddhiAppCreationException("Avro Schema is not specified in the stream definition." + streamName);
         }
     }
 
     @Override
     public void mapAndSend(Event[] events, OptionHolder optionHolder, Map<String, TemplateBuilder>
             payloadTemplateBuilderMap, SinkListener sinkListener) {
-        List<byte[]> data = new ArrayList<>();
+        List<byte[]> data = null;
         if (payloadTemplateBuilderMap == null) {
-            data.addAll(constructAvroArrayForDefaultMapping(events));
+            data = constructAvroArrayForDefaultMapping(events);
         }
-        if (!data.isEmpty()) {
+        if (data != null && !data.isEmpty()) {
                 sinkListener.publish(data);
         }
     }
@@ -170,7 +169,7 @@ public class AvroSinkMapper extends SinkMapper {
             }
             return convertedEvent;
         } else {
-            log.error("Invalid object type. " + eventObj.toString() +
+            log.error("Invalid object type. " + eventObj.toString() + " of type " + eventObj.getClass().getName() +
                     " cannot be converted to an Avro Message");
             return new byte[0];
         }
@@ -198,8 +197,7 @@ public class AvroSinkMapper extends SinkMapper {
                     }
                 }
             } else {
-                attributeValue = UNDEFINED;
-                innerParentObject.addProperty(attributeName, attributeValue.toString());
+                innerParentObject.addProperty(attributeName, UNDEFINED);
             }
         }
         return innerParentObject;

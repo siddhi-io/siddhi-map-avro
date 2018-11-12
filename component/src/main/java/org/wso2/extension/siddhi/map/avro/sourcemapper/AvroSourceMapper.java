@@ -36,6 +36,7 @@ import org.wso2.siddhi.annotation.Parameter;
 import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.Event;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.stream.input.source.AttributeMapping;
 import org.wso2.siddhi.core.stream.input.source.InputEventHandler;
@@ -58,10 +59,11 @@ import java.util.List;
 @Extension(
         name = "avro",
         namespace = "sourceMapper",
-        description = "Avro to Event input mapper. Transports which accepts Avro messages can utilize this extension"
+        description = ""
+                + "Avro to Event input mapper. Transports which accepts Avro messages can utilize this extension "
                 + "to convert the incoming Avro message to Siddhi event. Users should specify the avro "
-                + "schema used to create avro message as a parameter in stream definition. "
-                + "The specified avro schema is used convert the avro message into siddhi event.",
+                + "schema used to create avro message as a parameter in stream definition. \n"
+                + "The specified avro schema is used to convert the avro message into siddhi event.",
         parameters = {
                 @Parameter(name = "schema.def",
                         description =
@@ -78,8 +80,8 @@ import java.util.List;
                                 + "define stream userStream (name string, age int );\n",
                         description = "Above configuration will do a default Avro input mapping. " +
                                 "The input avro message containing user info will be " +
-                                "converted  to a siddhi event.\n "
-                                + "Expected input is a byte array.")
+                                "converted  to a siddhi event.\n " +
+                                "Expected input is a byte array.")
         }
 )
 
@@ -117,15 +119,14 @@ public class AvroSourceMapper extends SourceMapper {
         this.streamAttributesSize = this.streamDefinition.getAttributeList().size();
         schema = getAvroSchema(optionHolder.validateAndGetStaticValue(DEFAULT_AVRO_MAPPING_PREFIX.concat(".").
                         concat(SCHEMA_IDENTIFIER),
-                null));
+                null), streamDefinition.getId());
     }
 
-    private Schema getAvroSchema(String schemaDefinition) {
+    private Schema getAvroSchema(String schemaDefinition, String streamName) {
         if (schemaDefinition != null) {
             return new Schema.Parser().parse(schemaDefinition);
         } else {
-            log.error("Avro Schema is not specified in the stream definition");
-            return null;
+            throw new SiddhiAppCreationException("Avro Schema is not specified in the stream definition." + streamName);
         }
     }
 
@@ -202,7 +203,7 @@ public class AvroSourceMapper extends SourceMapper {
                 }
             }
         }
-        return listToArray(eventList);
+        return eventList.toArray(new Event[0]);
     }
 
     private Event[] convertToSingleEventForDefaultMapping(String avroMessage)  {
@@ -341,7 +342,7 @@ public class AvroSourceMapper extends SourceMapper {
             }
         }
         eventList.add(event);
-        return listToArray(eventList);
+        return eventList.toArray(new Event[0]);
     }
 
     private boolean isJsonValid(String jsonInString) {
@@ -400,16 +401,6 @@ public class AvroSourceMapper extends SourceMapper {
         }
         traverseJsonArray(parser);
         return false;
-    }
-
-    private Event[] listToArray(List eventList) {
-        int index = 0;
-        Object[] objectList = eventList.toArray();
-        Event[] events = new Event[objectList.length];
-        for (Object obj : objectList) {
-            events[index++] = (Event) obj;
-        }
-        return events;
     }
 
     @Override
