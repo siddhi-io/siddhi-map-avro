@@ -139,21 +139,41 @@
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
                             com.fasterxml.jackson.core.*,
-                            org.apache.tapestry5.json.*,
                             com.jayway.jsonpath.*,
                             net.minidev.*,
                             org.objectweb.asm.*,
                             com.google.gson.*,
                             org.apache.avro.*,
                             org.codehaus.jackson.*,
-                            avro.shaded.com.google.common.*
+                            avro.shaded.com.google.common.*,
+                            com.thoughtworks.paranamer.*,
+                            org.apache.commons.compress.utils.*,
+                            org.apache.commons.compress.compressors.*,
+                            org.joda.time.*,
+                            org.xerial.snappy.*,
                         </Private-Package>
                         <Export-Package>
                             org.wso2.extension.siddhi.map.avro.*
                         </Export-Package>
-                        <!--<Import-Package>-->
-                            <!--*;resolution:=optional-->
-                        <!--</Import-Package>-->
+                        <Import-Package>
+                            com.fasterxml.jackson.databind.*,
+                            javax.annotation.*,
+                            javax.xml.*,
+                            org.apache.log4j.*,
+                            org.apache.tapestry5.json.*,
+                            org.wso2.siddhi.annotation.*,
+                            org.wso2.siddhi.core.config.*,
+                            org.wso2.siddhi.core.event.*,
+                            org.wso2.siddhi.core.exception.*,
+                            org.wso2.siddhi.core.stream..*,
+                            org.wso2.siddhi.core.util.*,
+                            org.wso2.siddhi.query.api.definition.*,
+                            org.json.*,
+                            org.slf4j.*,
+                            org.w3c.*,
+                            org.xml.sax.*,
+                            sun.misc.*,
+                        </Import-Package>
                         <Include-Resource>
                             META-INF=target/classes/META-INF
                         </Include-Resource>
