@@ -31,6 +31,8 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.BinaryEncoder;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.EncoderFactory;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -43,8 +45,8 @@ import java.util.Properties;
 /**
  * Class defining the Constants for Kafka Test cases.
  */
-public class KafkaTestUtil {
-    private static final Logger log = Logger.getLogger(KafkaTestUtil.class);
+public class ConnectionTestUtil {
+    private static final Logger log = Logger.getLogger(ConnectionTestUtil.class);
     public static final String ZK_SERVER_CON_STRING = "localhost:2181";
 
     private static GenericRecord stock;
@@ -158,5 +160,11 @@ public class KafkaTestUtil {
         } catch (InterruptedException e) {
             log.error("Thread sleep failed", e);
         }
+    }
+
+    public static void connectToSchemaRegistry(String url) throws IOException {
+        DefaultHttpClient httpClient = new DefaultHttpClient();
+        HttpGet getRequest = new HttpGet(url);;
+        httpClient.execute(getRequest);
     }
 }

@@ -20,8 +20,12 @@ package org.wso2.extension.siddhi.map.avro.sinkmapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.apache.avro.Schema;
+import org.apache.avro.SchemaParseException;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.map.avro.util.AvroMessageProcessor;
+import org.wso2.extension.siddhi.map.avro.util.schema.RecordSchema;
+import org.wso2.extension.siddhi.map.avro.util.schema.SchemaRegistryReader;
 import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
@@ -34,8 +38,10 @@ import org.wso2.siddhi.core.stream.output.sink.SinkMapper;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.transport.OptionHolder;
 import org.wso2.siddhi.core.util.transport.TemplateBuilder;
+import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -50,16 +56,27 @@ import java.util.Map;
         namespace = "sinkMapper",
         description = "" +
                 "This extension is an Event to Avro output mapper. \n" +
-                "Transports that publish  messages to Avro sink can utilize this extension " +
-                "to convert Siddhi events to " +
-                "Avro messages. \n" +
-                "User should specify the avro schema in stream definition.\n",
+                "Transports that publish  messages to Avro sink can utilize this extension to convert siddhi " +
+                "events to Avro messages. \n Users can either specify the avro schema or give the schema registry " +
+                "URL and schema reference id as a parameter in stream definition.\n" +
+                "In case no specification of avro schema a flat avro schema of type record is generated using " +
+                "the stream attributes as schema fields.",
         parameters = {
                 @Parameter(name = "schema.def",
                         description =
-                                "This specifies the desired avro schema to be used to convert " +
-                                        "siddhi event to avro message.\n" +
+                                "This specifies the desired avro schema to be used to convert siddhi events to " +
+                                        "avro message.\n" +
                                 "The schema should be specified as a quoted json string.",
+                        type = {DataType.STRING}),
+                @Parameter(name = "schema.registry",
+                        description =
+                                "Used to specify the URL of the schema registry.",
+                        type = {DataType.STRING}),
+                @Parameter(name = "schema.id",
+                        description =
+                                "Used to specify the id of the avro schema. This id is the global id returned from " +
+                                "the schema registry when posting the schema to the registry. The specified id is " +
+                                "used to retrive the schema from the schema registry.",
                         type = {DataType.STRING})
         },
         examples = {
@@ -70,8 +87,18 @@ import java.util.Map;
                                 "\"type\":\"string\"},{\"name\":\"price\":\"type\":\"float\"}," +
                                  "{\"name\":\"volume\",\"type\":\"long\"}]}\"\"\"))\n" +
                                  "define stream stockStream (symbol string, price float, volume long);",
-                        description = "The above configuration performs a default Avro mapping that "
-                                + "generates an Avro message as output byte array.")
+                        description = "The above configuration performs a default Avro mapping that generates " +
+                                      "an Avro message as output byte array."),
+                @Example(
+                        syntax = "@sink(type='inMemory', topic='stock', @map(type='avro'," +
+                                "schema.registry = 'http://localhost:8081', schema.id ='22'," +
+                                "@payload(\"\"\"{\"Symbol\":\"{{symbol}}\",\"Price\":{{price}}," +
+                                "\"Volume\":{{volume}}}\"\"\"\n" +
+                                ")))\n" +
+                                "define stream stockStream (symbol string, price float, volume long);",
+                        description = "The above configuration performs a custom Avro mapping that generates " +
+                                      "an Avro message as output byte array. The avro schema is retrieved " +
+                                      "from the given schema registry using the provided schema id.")
         }
 )
 
@@ -80,10 +107,13 @@ public class AvroSinkMapper extends SinkMapper {
     private static final String DEFAULT_AVRO_MAPPING_PREFIX = "schema";
     private static final String SCHEMA_IDENTIFIER = "def";
     private static final String UNDEFINED = "undefined";
+    private static final String SCHEMA_REGISTRY = "registry";
+    private static final String SCHEMA_ID = "id";
 
     private String[] attributeNameArray;
     private Schema schema;
-
+    private List<Attribute> attributeList;
+    
     /**
      * Initialize the mapper and the mapping configurations.
      *
@@ -96,6 +126,7 @@ public class AvroSinkMapper extends SinkMapper {
             payloadTemplateBuilderMap, ConfigReader mapperConfigReader, SiddhiAppContext siddhiAppContext) {
 
         this.attributeNameArray = streamDefinition.getAttributeNameArray();
+        this.attributeList = streamDefinition.getAttributeList();
         //if @payload() is added there must be at least 1 element in it, otherwise a SiddhiParserException raised
         if (payloadTemplateBuilderMap != null && payloadTemplateBuilderMap.size() != 1) {
             throw new SiddhiAppCreationException("Avro sink-mapper does not support multiple @payload mappings, " +
@@ -107,28 +138,57 @@ public class AvroSinkMapper extends SinkMapper {
                     "error at the mapper of '" + streamDefinition.getId() + "'");
         }
         schema = getAvroSchema (optionHolder.validateAndGetStaticValue(DEFAULT_AVRO_MAPPING_PREFIX.concat(".").
-                        concat(SCHEMA_IDENTIFIER),
-                null), streamDefinition.getId());
+                        concat(SCHEMA_IDENTIFIER), null),
+                optionHolder.validateAndGetStaticValue(DEFAULT_AVRO_MAPPING_PREFIX.concat(".").
+                        concat(SCHEMA_REGISTRY), null),
+                optionHolder.validateAndGetStaticValue(DEFAULT_AVRO_MAPPING_PREFIX.concat(".").
+                        concat(SCHEMA_ID), null), streamDefinition.getId());
     }
 
-    private Schema getAvroSchema(String schemaDefinition, String streamName) {
-        if (schemaDefinition != null) {
-            return new Schema.Parser().parse(schemaDefinition);
-        } else {
-            throw new SiddhiAppCreationException("Avro Schema is not specified in the stream definition. "
+    private Schema getAvroSchema(String schemaDefinition,  String schemaRegistryURL, String schemaID,
+            String streamName) {
+        Schema returnSchema = null;
+        try {
+            if (schemaDefinition != null) {
+                returnSchema = new Schema.Parser().parse(schemaDefinition);
+            } else if (schemaRegistryURL != null) {
+                SchemaRegistryReader schemaRegistryReader = new SchemaRegistryReader();
+                returnSchema = schemaRegistryReader.getSchemaFromID(schemaID, schemaRegistryURL);
+            } else if (attributeList.size() > 0) {
+                RecordSchema recordSchema = new RecordSchema();
+                returnSchema = recordSchema.generateAvroSchema(this.attributeList, streamName);
+            } else {
+                throw new SiddhiAppCreationException("Avro Schema is not specified in the stream definition. "
+                        + streamName);
+            }
+        } catch (SchemaParseException e) {
+            throw new SiddhiAppCreationException("Unable to parse Schema for stream:" + streamName + ". " +
+                    e.getMessage());
+        } catch (ClientProtocolException e) {
+            throw new SiddhiAppCreationException("Exception occured when retriving schema." + e.getMessage());
+        } catch (IOException e) {
+            throw new SiddhiAppCreationException("IOException occured when retriving schema from schema registry:" +
+                    schemaRegistryURL + ". schema ID:" + schemaID + "." + e.getMessage());
+        }
+        if (returnSchema == null) {
+            throw new SiddhiAppCreationException("Error when generating Avro Schema for stream: "
                     + streamName);
         }
+        return returnSchema;
     }
 
     @Override
     public void mapAndSend(Event[] events, OptionHolder optionHolder, Map<String, TemplateBuilder>
             payloadTemplateBuilderMap, SinkListener sinkListener) {
-        List<byte[]> data = null;
-        if (payloadTemplateBuilderMap == null) {
-            data = constructAvroArrayForDefaultMapping(events);
+        List<byte[]> data = new ArrayList<>();
+        for (Event event: events) {
+            byte[] returnedData = mapSingleEvent(event, payloadTemplateBuilderMap);
+            if (returnedData != null) {
+                data.add(returnedData);
+            }
         }
-        if (data != null && !data.isEmpty()) {
-                sinkListener.publish(data);
+        for (byte[] message: data) {
+            sinkListener.publish(message);
         }
     }
 
@@ -136,27 +196,28 @@ public class AvroSinkMapper extends SinkMapper {
     public void mapAndSend(Event event, OptionHolder optionHolder, Map<String, TemplateBuilder>
             payloadTemplateBuilderMap, SinkListener sinkListener) {
         byte[] data = null;
-        if (payloadTemplateBuilderMap == null) {
-            data = constructAvroForDefaultMapping(event);
-        }
+        data = mapSingleEvent(event, payloadTemplateBuilderMap);
         if (data != null) {
             sinkListener.publish(data);
         }
     }
 
-    private List<byte[]> constructAvroArrayForDefaultMapping(Event[] eventObj) {
-        List<byte[]> convertedEvents = new ArrayList<>();
-            for (Event event: eventObj) {
-                byte[] convertedEvent = constructAvroForDefaultMapping(event);
-                if (convertedEvent != null) {
-                    convertedEvents.add(convertedEvent);
-                }
-            }
-            return convertedEvents;
+    private byte[] mapSingleEvent(Event event, Map<String, TemplateBuilder>
+            payloadTemplateBuilderMap) {
+        byte[] data = null;
+        if (payloadTemplateBuilderMap == null) {
+            data = constructAvroForDefaultMapping(event);
+        } else {
+            data = constructAvroForCustomMapping(event, payloadTemplateBuilderMap.get(
+                    payloadTemplateBuilderMap.keySet().iterator().next()));
+        }
+        return data;
     }
 
-    //The method returns a null instead of a byte[0] to enhance the performance.
-    //Creation of empty byte array and length > 0 check for each event conversion is costly
+    /**
+     * The method returns a null instead of a byte[0] to enhance the performance.
+     * Creation of empty byte array and length > 0 check for each event conversion is costly
+     */
     private byte[] constructAvroForDefaultMapping(Object eventObj) {
         byte[] convertedEvent = null;
 
@@ -174,6 +235,22 @@ public class AvroSinkMapper extends SinkMapper {
         } else {
             log.error("Invalid object type. " + eventObj.toString() + " of type " + eventObj.getClass().getName() +
                     " cannot be converted to an Avro Message");
+            return null;
+        }
+    }
+
+    /**
+     * The method returns a null instead of a byte[0] to enhance the performance.
+     * Creation of empty byte array and length > 0 check for each event conversion is costly
+     */
+    private byte[] constructAvroForCustomMapping(Event event, TemplateBuilder payloadTemplateBuilder) {
+        String jsonString = (String) payloadTemplateBuilder.build(doPartialProcessing(event));
+        try {
+            return AvroMessageProcessor.serializeAvroMessage(jsonString, schema);
+        } catch (Throwable t) {
+            log.error("Error when converting siddhi event: " + Arrays.toString(event.getData()) +
+                    " to Avro message of schema: " + schema + "." + t.getMessage() +
+                    ". Hence dropping the event.");
             return null;
         }
     }
@@ -204,6 +281,16 @@ public class AvroSinkMapper extends SinkMapper {
             }
         }
         return innerParentObject;
+    }
+
+    private Event doPartialProcessing(Event event) {
+        Object[] data = event.getData();
+        for (int i = 0; i < data.length; i++) {
+            if (data[i] == null) {
+                data[i] = UNDEFINED;
+            }
+        }
+        return event;
     }
 
     @Override

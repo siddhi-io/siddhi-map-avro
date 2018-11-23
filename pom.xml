@@ -92,6 +92,11 @@
                 <classifier>runtime</classifier>
                 <version>${jacoco.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpComponent.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -143,6 +148,7 @@
         <net.minidev.version>2.2</net.minidev.version>
         <jacoco.version>0.7.9</jacoco.version>
         <avro.version>1.8.2</avro.version>
+        <httpComponent.version>4.2.2</httpComponent.version>
         <!--Testing purposes-->
         <kafka_2.11.version>0.10.0.0</kafka_2.11.version>
         <siddhi-io-kafka>4.1.17</siddhi-io-kafka>

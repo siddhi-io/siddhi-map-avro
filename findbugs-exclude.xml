@@ -30,4 +30,8 @@
         <Class name="org.wso2.extension.siddhi.map.avro.sourcemapper.AvroSourceMapper" />
         <Bug pattern="PZLA_PREFER_ZERO_LENGTH_ARRAYS" />
     </Match>
+    <Match>
+        <Class name="org.wso2.extension.siddhi.map.avro.util.schema.RecordSchema" />
+        <Bug pattern="DM_CONVERT_CASE" />
+    </Match>
 </FindBugsFilter>
