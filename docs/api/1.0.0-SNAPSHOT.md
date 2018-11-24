@@ -4,7 +4,7 @@
 
 ### avro *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sink-mapper">(Sink Mapper)</a>*
 
-<p style="word-wrap: break-word">This extension is an Event to Avro output mapper. <br>Transports that publish  messages to Avro sink can utilize this extension to convert siddhi events to Avro messages. <br>&nbsp;Users can either specify the avro schema or give the schema registry URL and schema reference id as a parameter in stream definition.<br>In case no specification of avro schema a flat avro schema of type record is generated using the stream attributes as schema fields.</p>
+<p style="word-wrap: break-word">This extension is an Event to Avro output mapper.Transports that publish  messages to Avro sink can utilize this extension to convert siddhi events to Avro messages.<br>&nbsp;Users can either specify the avro schema or give the schema registry URL and schema reference id as a parameter in stream definition.<br>In case no specification of avro schema a flat avro schema of type record is generated using the stream attributes as schema fields.</p>
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
@@ -141,5 +141,5 @@ define stream userStream (name string, age int );
 define stream userStream (name string, age int );
 
 ```
-<p style="word-wrap: break-word">Above configuration will do a custom Avro input mapping. The input avro message containing user info will be converted to a siddhi event using the schema retrived from schema registry.<br>&nbsp;Expected input is a byte array.</p>
+<p style="word-wrap: break-word">Above configuration will do a custom Avro input mapping. The input avro message containing user info will be converted to a siddhi event using the schema retrived from schema registry.<br>Expected input is a byte array.</p>
 

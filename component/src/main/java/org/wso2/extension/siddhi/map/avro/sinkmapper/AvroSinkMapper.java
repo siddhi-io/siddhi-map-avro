@@ -55,28 +55,25 @@ import java.util.Map;
         name = "avro",
         namespace = "sinkMapper",
         description = "" +
-                "This extension is an Event to Avro output mapper. \n" +
+                "This extension is an Event to Avro output mapper." +
                 "Transports that publish  messages to Avro sink can utilize this extension to convert siddhi " +
-                "events to Avro messages. \n Users can either specify the avro schema or give the schema registry " +
+                "events to Avro messages.\n Users can either specify the avro schema or give the schema registry " +
                 "URL and schema reference id as a parameter in stream definition.\n" +
                 "In case no specification of avro schema a flat avro schema of type record is generated using " +
                 "the stream attributes as schema fields.",
         parameters = {
                 @Parameter(name = "schema.def",
-                        description =
-                                "This specifies the desired avro schema to be used to convert siddhi events to " +
-                                        "avro message.\n" +
+                        description = "This specifies the desired avro schema to be used to convert siddhi " +
+                                        "events to avro message.\n" +
                                 "The schema should be specified as a quoted json string.",
                         type = {DataType.STRING}),
                 @Parameter(name = "schema.registry",
-                        description =
-                                "Used to specify the URL of the schema registry.",
+                        description = "Used to specify the URL of the schema registry.",
                         type = {DataType.STRING}),
                 @Parameter(name = "schema.id",
-                        description =
-                                "Used to specify the id of the avro schema. This id is the global id returned from " +
-                                "the schema registry when posting the schema to the registry. The specified id is " +
-                                "used to retrive the schema from the schema registry.",
+                        description = "Used to specify the id of the avro schema. This id is the global id " +
+                                "returned from the schema registry when posting the schema to the registry. " +
+                                "The specified id is used to retrive the schema from the schema registry.",
                         type = {DataType.STRING})
         },
         examples = {

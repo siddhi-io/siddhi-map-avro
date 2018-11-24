@@ -115,8 +115,8 @@ import java.util.List;
                                 "define stream userStream (name string, age int );\n",
                         description = "Above configuration will do a custom Avro input mapping. " +
                                 "The input avro message containing user info will be " +
-                                "converted  to a siddhi event.\n "
-                                + "Expected input is a byte array."),
+                                "converted  to a siddhi event.\n " +
+                                "Expected input is a byte array."),
                 @Example(
                         syntax = "@source(type='inMemory', topic='user', @map(type='avro'," +
                                 "schema.registry='http://192.168.2.5:9090', schema.id='1'," +
@@ -124,7 +124,7 @@ import java.util.List;
                                 "define stream userStream (name string, age int );\n",
                         description = "Above configuration will do a custom Avro input mapping. The input avro " +
                                       "message containing user info will be converted to a siddhi event using the " +
-                                      "schema retrived from schema registry.\n " +
+                                      "schema retrived from schema registry.\n" +
                                       "Expected input is a byte array.")
         }
 )
