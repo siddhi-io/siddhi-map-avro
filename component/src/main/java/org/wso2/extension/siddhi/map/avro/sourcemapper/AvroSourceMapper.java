@@ -101,15 +101,6 @@ public class AvroSourceMapper extends SourceMapper {
     private Gson gson = new Gson();
     private Schema schema;
 
-    /**
-     * Initialize the mapper and the mapping configurations.
-     *
-     * @param streamDefinition
-     * @param optionHolder
-     * @param attributeMappingList
-     * @param configReader
-     * @param siddhiAppContext
-     */
     @Override
     public void init(StreamDefinition streamDefinition, OptionHolder optionHolder, List<AttributeMapping>
             attributeMappingList, ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
@@ -131,13 +122,6 @@ public class AvroSourceMapper extends SourceMapper {
         }
     }
 
-    /**
-     * Receives an event or events as a byte[] from source, converts it to
-     * a {@link org.wso2.siddhi.core.event.ComplexEventChunk}.
-     *
-     * @param eventObject       the input, given as a byte array
-     * @param inputEventHandler input handler
-     */
     @Override
     protected void mapAndProcess(Object eventObject, InputEventHandler inputEventHandler) throws InterruptedException {
         Event[] convertedEvent = null;
