@@ -27,7 +27,7 @@
 
     <groupId>org.wso2.extension.siddhi.map.avro</groupId>
     <artifactId>siddhi-map-avro-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.1-SNAPSHOT</version>
     <name>Siddhi Avro Map Extensions</name>
 
     <modules>
