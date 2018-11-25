@@ -75,7 +75,7 @@ import java.util.List;
                 @Example(
                         syntax = "@source(type='inMemory', topic='user', @map(type='avro', schema .def = \"\"\"" +
                                 "{\"type\":\"record\",\"name\":\"userInfo\",\"namespace\":\"user.example\",\"fields\"" +
-                                ":[{\"name\":\"name\",\"type\":\"string”}, {\"name\":\"age\",\"type\":\"int\"}]}" +
+                                ":[{\"name\":\"name\",\"type\":\"string\"}, {\"name\":\"age\",\"type\":\"int\"}]}" +
                                 "\"\"\"))\n"
                                 + "define stream userStream (name string, age int );\n",
                         description = "Above configuration will do a default Avro input mapping. " +
