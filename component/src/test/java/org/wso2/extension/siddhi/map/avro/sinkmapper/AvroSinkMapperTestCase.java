@@ -17,6 +17,7 @@
  */
 package org.wso2.extension.siddhi.map.avro.sinkmapper;
 
+import feign.FeignException;
 import org.apache.avro.SchemaParseException;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.log4j.Appender;
@@ -41,13 +42,12 @@ import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.core.util.transport.InMemoryBroker;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class AvroSinkMapperTestCase {
-    private static Logger log = Logger.getLogger(AvroSinkMapperTestCase.class);
+    private static final Logger log = Logger.getLogger(AvroSinkMapperTestCase.class);
     private static String schemaRegistryURL = "http://localhost:8081";
     private AtomicInteger count = new AtomicInteger();
     private boolean eventArrived;
@@ -593,7 +593,7 @@ public class AvroSinkMapperTestCase {
             AssertJUnit.assertTrue(eventArrived);
             AssertJUnit.assertTrue(innerAssertionsPass);
             AssertJUnit.assertEquals(1, count.get());
-        } catch (IOException e) {
+        } catch (FeignException e) {
             log.warn("Schema Registry at " + schemaRegistryURL + " may not be available.");
         }
     }

@@ -28,10 +28,10 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
 import com.jayway.jsonpath.ReadContext;
+import feign.FeignException;
 import net.minidev.json.JSONArray;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaParseException;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.map.avro.util.AvroMessageProcessor;
 import org.wso2.extension.siddhi.map.avro.util.schema.RecordSchema;
@@ -67,8 +67,8 @@ import java.util.List;
         namespace = "sourceMapper",
         description = "" +
                 "Avro to Event input mapper. Transports which accepts Avro messages can utilize this extension " +
-                "to convert the incoming Avro message to Siddhi event. Users can specify the avro schema used to " +
-                "create avro message as a parameter in stream definition. In case no specification of avro schema " +
+                "to convert the incoming Avro message to Siddhi event.\nUsers can specify the avro schema used to " +
+                "create avro message as a parameter in stream definition.\nIn case no specification of avro schema " +
                 "a flat avro schema of type record is generated using the stream attributes as schema fields.\n" +
                 "The generated/specified avro schema is used to convert the avro message into siddhi event.",
         parameters = {
@@ -101,7 +101,7 @@ import java.util.List;
                 @Example(
                         syntax = "@source(type='inMemory', topic='user', @map(type='avro', schema .def = \"\"\"" +
                                 "{\"type\":\"record\",\"name\":\"userInfo\",\"namespace\":\"user.example\",\"fields\"" +
-                                ":[{\"name\":\"name\",\"type\":\"string”}, {\"name\":\"age\", \"type\":\"int\"}]}" +
+                                ":[{\"name\":\"name\",\"type\":\"string\"}, {\"name\":\"age\",\"type\":\"int\"}]}" +
                                 "\"\"\"))\n"
                                 + "define stream userStream (name string, age int );\n",
                         description = "Above configuration will do a default Avro input mapping. The input avro " +
@@ -109,8 +109,8 @@ import java.util.List;
                                       "Expected input is a byte array."),
                 @Example(
                         syntax = "@source(type='inMemory', topic='user', @map(type='avro', schema .def = \"\"\"" +
-                                "{\"type\":\"record\",\"name\":“userInfo\",\"namespace\":\"avro.userInfo\"," +
-                                "\"fields\":[{\"name\":\"username\",\"type\":“string”}, {\"name\":\"age\"," +
+                                "{\"type\":\"record\",\"name\":\"userInfo\",\"namespace\":\"avro.userInfo\"," +
+                                "\"fields\":[{\"name\":\"username\",\"type\":\"string\"}, {\"name\":\"age\"," +
                                 "\"type\":\"int\"}]}\"\"\",@attributes(name=\"username\",age=\"age\")))\n" +
                                 "define stream userStream (name string, age int );\n",
                         description = "Above configuration will do a custom Avro input mapping. " +
@@ -124,7 +124,7 @@ import java.util.List;
                                 "define stream userStream (name string, age int );\n",
                         description = "Above configuration will do a custom Avro input mapping. The input avro " +
                                       "message containing user info will be converted to a siddhi event using the " +
-                                      "schema retrived from schema registry.\n" +
+                                      "schema retrived from given schema registry(localhost:8081).\n" +
                                       "Expected input is a byte array.")
         }
 )
@@ -195,8 +195,10 @@ public class AvroSourceMapper extends SourceMapper {
                 schema = new Schema.Parser().parse(schemaDefinition);
             } else if (schemaRegistryURL != null) {
                 SchemaRegistryReader schemaRegistryReader = new SchemaRegistryReader();
-                schema = schemaRegistryReader.getSchemaFromID(schemaID, schemaRegistryURL);
+                schema = schemaRegistryReader.getSchemaFromID(schemaRegistryURL, schemaID);
             } else if (streamAttributes.size() > 0) {
+                log.info("Schema Definition or Schema Registry is not specified in Stream. Hence generating " +
+                        "schema from stream attributes.");
                 RecordSchema recordSchema = new RecordSchema();
                 schema = recordSchema.generateAvroSchema(streamAttributes, streamDefinition.getId());
             } else {
@@ -206,11 +208,8 @@ public class AvroSourceMapper extends SourceMapper {
         } catch (SchemaParseException e) {
             throw new SiddhiAppCreationException("Unable to parse Schema for stream:" + streamName + ". " +
                     e.getMessage());
-        } catch (ClientProtocolException e) {
-            throw new SiddhiAppCreationException("Exception occured when retriving schema." + e.getMessage());
-        } catch (IOException e) {
-            throw new SiddhiAppCreationException("Error occured when retriving schema from schema registry:" +
-                    schemaRegistryURL + ". schema ID:" + schemaID + "." + e.getMessage());
+        } catch (FeignException e) {
+            throw new SiddhiAppCreationException("Error when retriving schema from schema registry. " + e.getMessage());
         }
         if (schema == null) {
             throw new SiddhiAppCreationException("Error when generating Avro Schema for stream: "

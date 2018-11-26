@@ -4,7 +4,7 @@
 
 ### avro *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sink-mapper">(Sink Mapper)</a>*
 
-<p style="word-wrap: break-word">This extension is an Event to Avro output mapper.Transports that publish  messages to Avro sink can utilize this extension to convert siddhi events to Avro messages.<br>&nbsp;Users can either specify the avro schema or give the schema registry URL and schema reference id as a parameter in stream definition.<br>In case no specification of avro schema a flat avro schema of type record is generated using the stream attributes as schema fields.</p>
+<p style="word-wrap: break-word">This extension is a Siddhi Event to Avro Message output mapper.Transports that publish  messages to Avro sink can utilize this extension to convert siddhi events to Avro messages.<br>&nbsp;Users can either specify the avro schema or give the schema registry URL and schema reference id as a parameter in stream definition.<br>In case no specification of avro schema a flat avro schema of type record is generated using the stream attributes as schema fields.</p>
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
@@ -57,17 +57,17 @@ define stream stockStream (symbol string, price float, volume long);
 
 <span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span>
 ```
-@sink(type='inMemory', topic='stock', @map(type='avro',schema.registry = 'http://localhost:8081', schema.id ='22',@payload("""{"Symbol":"{{symbol}}","Price":{{price}},"Volume":{{volume}}}"""
+@sink(type='inMemory', topic='stock', @map(type='avro',schema.registry = 'http://localhost:8081', schema.id ='22',@payload("""{"Symbol":{{symbol}},"Price":{{price}},"Volume":{{volume}}}"""
 )))
 define stream stockStream (symbol string, price float, volume long);
 ```
-<p style="word-wrap: break-word">The above configuration performs a custom Avro mapping that generates an Avro message as output byte array. The avro schema is retrieved from the given schema registry using the provided schema id.</p>
+<p style="word-wrap: break-word">The above configuration performs a custom Avro mapping that generates an Avro message as output byte array. The avro schema is retrieved from the given schema registry(localhost:8081) using the provided schema id.</p>
 
 ## Sourcemapper
 
 ### avro *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source-mapper">(Source Mapper)</a>*
 
-<p style="word-wrap: break-word">Avro to Event input mapper. Transports which accepts Avro messages can utilize this extension to convert the incoming Avro message to Siddhi event. Users can specify the avro schema used to create avro message as a parameter in stream definition. In case no specification of avro schema a flat avro schema of type record is generated using the stream attributes as schema fields.<br>The generated/specified avro schema is used to convert the avro message into siddhi event.</p>
+<p style="word-wrap: break-word">Avro to Event input mapper. Transports which accepts Avro messages can utilize this extension to convert the incoming Avro message to Siddhi event.<br>Users can specify the avro schema used to create avro message as a parameter in stream definition.<br>In case no specification of avro schema a flat avro schema of type record is generated using the stream attributes as schema fields.<br>The generated/specified avro schema is used to convert the avro message into siddhi event.</p>
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
@@ -121,7 +121,7 @@ define stream stockStream (symbol string, price float, volume long);
 <span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
 <span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
 ```
-@source(type='inMemory', topic='user', @map(type='avro', schema .def = """{"type":"record","name":"userInfo","namespace":"user.example","fields":[{"name":"name","type":"string”}, {"name":"age", "type":"int"}]}"""))
+@source(type='inMemory', topic='user', @map(type='avro', schema .def = """{"type":"record","name":"userInfo","namespace":"user.example","fields":[{"name":"name","type":"string"}, {"name":"age","type":"int"}]}"""))
 define stream userStream (name string, age int );
 
 ```
@@ -129,7 +129,7 @@ define stream userStream (name string, age int );
 
 <span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span>
 ```
-@source(type='inMemory', topic='user', @map(type='avro', schema .def = """{"type":"record","name":“userInfo","namespace":"avro.userInfo","fields":[{"name":"username","type":“string”}, {"name":"age","type":"int"}]}""",@attributes(name="username",age="age")))
+@source(type='inMemory', topic='user', @map(type='avro', schema .def = """{"type":"record","name":"userInfo","namespace":"avro.userInfo","fields":[{"name":"username","type":"string"}, {"name":"age","type":"int"}]}""",@attributes(name="username",age="age")))
 define stream userStream (name string, age int );
 
 ```
@@ -141,5 +141,5 @@ define stream userStream (name string, age int );
 define stream userStream (name string, age int );
 
 ```
-<p style="word-wrap: break-word">Above configuration will do a custom Avro input mapping. The input avro message containing user info will be converted to a siddhi event using the schema retrived from schema registry.<br>Expected input is a byte array.</p>
+<p style="word-wrap: break-word">Above configuration will do a custom Avro input mapping. The input avro message containing user info will be converted to a siddhi event using the schema retrived from given schema registry(localhost:8081).<br>Expected input is a byte array.</p>
 

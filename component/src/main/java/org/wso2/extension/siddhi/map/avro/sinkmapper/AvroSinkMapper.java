@@ -19,9 +19,9 @@ package org.wso2.extension.siddhi.map.avro.sinkmapper;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import feign.FeignException;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaParseException;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.map.avro.util.AvroMessageProcessor;
 import org.wso2.extension.siddhi.map.avro.util.schema.RecordSchema;
@@ -41,7 +41,6 @@ import org.wso2.siddhi.core.util.transport.TemplateBuilder;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -55,7 +54,7 @@ import java.util.Map;
         name = "avro",
         namespace = "sinkMapper",
         description = "" +
-                "This extension is an Event to Avro output mapper." +
+                "This extension is a Siddhi Event to Avro Message output mapper." +
                 "Transports that publish  messages to Avro sink can utilize this extension to convert siddhi " +
                 "events to Avro messages.\n Users can either specify the avro schema or give the schema registry " +
                 "URL and schema reference id as a parameter in stream definition.\n" +
@@ -89,13 +88,13 @@ import java.util.Map;
                 @Example(
                         syntax = "@sink(type='inMemory', topic='stock', @map(type='avro'," +
                                 "schema.registry = 'http://localhost:8081', schema.id ='22'," +
-                                "@payload(\"\"\"{\"Symbol\":\"{{symbol}}\",\"Price\":{{price}}," +
+                                "@payload(\"\"\"{\"Symbol\":{{symbol}},\"Price\":{{price}}," +
                                 "\"Volume\":{{volume}}}\"\"\"\n" +
                                 ")))\n" +
                                 "define stream stockStream (symbol string, price float, volume long);",
                         description = "The above configuration performs a custom Avro mapping that generates " +
                                       "an Avro message as output byte array. The avro schema is retrieved " +
-                                      "from the given schema registry using the provided schema id.")
+                                      "from the given schema registry(localhost:8081) using the provided schema id.")
         }
 )
 
@@ -150,8 +149,10 @@ public class AvroSinkMapper extends SinkMapper {
                 returnSchema = new Schema.Parser().parse(schemaDefinition);
             } else if (schemaRegistryURL != null) {
                 SchemaRegistryReader schemaRegistryReader = new SchemaRegistryReader();
-                returnSchema = schemaRegistryReader.getSchemaFromID(schemaID, schemaRegistryURL);
+                returnSchema = schemaRegistryReader.getSchemaFromID(schemaRegistryURL, schemaID);
             } else if (attributeList.size() > 0) {
+                log.info("Schema Definition and Schema Registry is not specified in Stream. Hence generating " +
+                        "schema from stream attributes.");
                 RecordSchema recordSchema = new RecordSchema();
                 returnSchema = recordSchema.generateAvroSchema(this.attributeList, streamName);
             } else {
@@ -161,11 +162,8 @@ public class AvroSinkMapper extends SinkMapper {
         } catch (SchemaParseException e) {
             throw new SiddhiAppCreationException("Unable to parse Schema for stream:" + streamName + ". " +
                     e.getMessage());
-        } catch (ClientProtocolException e) {
-            throw new SiddhiAppCreationException("Exception occured when retriving schema." + e.getMessage());
-        } catch (IOException e) {
-            throw new SiddhiAppCreationException("IOException occured when retriving schema from schema registry:" +
-                    schemaRegistryURL + ". schema ID:" + schemaID + "." + e.getMessage());
+        } catch (FeignException e) {
+            throw new SiddhiAppCreationException("Error when retriving schema from schema registry. " + e.getMessage());
         }
         if (returnSchema == null) {
             throw new SiddhiAppCreationException("Error when generating Avro Schema for stream: "

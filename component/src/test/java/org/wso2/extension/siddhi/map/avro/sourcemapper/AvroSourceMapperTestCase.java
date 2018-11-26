@@ -17,6 +17,7 @@
  */
 package org.wso2.extension.siddhi.map.avro.sourcemapper;
 
+import feign.FeignException;
 import org.I0Itec.zkclient.exception.ZkTimeoutException;
 import org.apache.log4j.Appender;
 import org.apache.log4j.Layout;
@@ -30,7 +31,6 @@ import org.wso2.extension.siddhi.map.avro.AvroSchemaDefinitions;
 import org.wso2.extension.siddhi.map.avro.ConnectionTestUtil;
 import org.wso2.extension.siddhi.map.avro.util.AvroMessageProcessor;
 import org.wso2.extension.siddhi.map.avro.util.schema.RecordSchema;
-import org.wso2.extension.siddhi.map.avro.util.schema.SchemaRegistryReader;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
@@ -40,7 +40,6 @@ import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.core.util.transport.InMemoryBroker;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class AvroSourceMapperTestCase {
@@ -544,7 +543,7 @@ public class AvroSourceMapperTestCase {
             AssertJUnit.assertTrue(eventArrived);
             AssertJUnit.assertTrue(innerAssertionsPass);
             AssertJUnit.assertEquals(1, count.get());
-        } catch (IOException e) {
+        } catch (FeignException e) {
             log.warn("Schema Registry at " + schemaRegistryURL + " may not be available.");
         }
     }
@@ -565,18 +564,16 @@ public class AvroSourceMapperTestCase {
                 "insert into BarStream; ";
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        Logger logger = Logger.getLogger(SchemaRegistryReader.class);
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        Layout layout = new SimpleLayout();
-        Appender appender = new WriterAppender(layout, out);
-        logger.addAppender(appender);
-
         try {
             ConnectionTestUtil.connectToSchemaRegistry(schemaRegistryURL);
             siddhiManager.createSiddhiAppRuntime(streams + query);
-            AssertJUnit.assertEquals("ERROR - Schema with id: 23 not found in schema registry: " +
-                    "http://localhost:8081", out.toString().trim());
-        } catch (IOException e) {
+        } catch (SiddhiAppCreationException e) {
+            AssertJUnit.assertEquals("Error on 'TestApp' @ Line: 1. Position: 138, near '@source(type='inMemory', " +
+                 "topic='stock', @map(type='avro', schema.id = '23',schema.registry = 'http://localhost:8081'))'. " +
+                 "Error when retriving schema from schema registry. status 404 reading SchemaRegistryClient#findByID" +
+                 "(String); content:\n{\"error_code\":40403,\"message\":\"Schema not found\"}", e.getMessage());
+            throw e;
+        } catch (FeignException e) {
             log.warn("Schema Registry at " + schemaRegistryURL + " may not be available.");
             throw new SiddhiAppCreationException("Siddi App cannot be created.");
         }

@@ -17,6 +17,11 @@
  */
 package org.wso2.extension.siddhi.map.avro;
 
+import feign.Feign;
+import feign.FeignException;
+import feign.gson.GsonDecoder;
+import feign.gson.GsonEncoder;
+import feign.okhttp.OkHttpClient;
 import kafka.admin.AdminUtils;
 import kafka.admin.RackAwareMode;
 import kafka.common.TopicExistsException;
@@ -31,12 +36,11 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.BinaryEncoder;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.EncoderFactory;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.log4j.Logger;
+import org.wso2.extension.siddhi.map.avro.util.schema.SchemaRegistryClient;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -162,9 +166,12 @@ public class ConnectionTestUtil {
         }
     }
 
-    public static void connectToSchemaRegistry(String url) throws IOException {
-        DefaultHttpClient httpClient = new DefaultHttpClient();
-        HttpGet getRequest = new HttpGet(url);;
-        httpClient.execute(getRequest);
+    public static void connectToSchemaRegistry(String url) throws FeignException {
+        SchemaRegistryClient registryClient = Feign.builder()
+                .client(new OkHttpClient())
+                .encoder(new GsonEncoder())
+                .decoder(new GsonDecoder())
+                .target(SchemaRegistryClient.class, url);
+        registryClient.connect();
     }
 }
