@@ -45,7 +45,7 @@ public class RecordSchema {
         this.type = SCHEMA_TYPE;
     }
 
-    public Schema generateAvroSchema(List<Attribute> streamAttributes, String streamName) {
+    public Schema generateAvroSchema(List<Attribute> streamAttributes, String streamName) throws SchemaParseException{
         List<Map<String, String>> schemaFields = new ArrayList<>();
         Gson gson = new Gson();
 
@@ -57,12 +57,7 @@ public class RecordSchema {
         }
         this.name = streamName;
         this.fields = schemaFields;
-
-        try {
-            return new Schema.Parser().parse(gson.toJson(this));
-        } catch (SchemaParseException e) {
-            throw e;
-        }
+        return new Schema.Parser().parse(gson.toJson(this));
     }
 
     private String attributeTypeToString(Attribute.Type type, String name) {
