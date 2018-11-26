@@ -508,8 +508,8 @@ public class AvroSourceMapper extends SourceMapper {
                                     break;
                                 default:
                                     data[position] = null;
-                                    log.info(parser.nextToken() + " is not a acceptable data format. Hence data " +
-                                             "value is set to null");
+                                    log.info(parser.nextToken() + " is not a valid data type for event data value. " +
+                                             " Hence event data value is set to null");
                             }
                         } catch (IOException e) {
                             throw new SiddhiAppRuntimeException("Initializing a parser failed for the event string."
