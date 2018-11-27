@@ -197,7 +197,7 @@ public class AvroSourceMapper extends SourceMapper {
                 SchemaRegistryReader schemaRegistryReader = new SchemaRegistryReader();
                 schema = schemaRegistryReader.getSchemaFromID(schemaRegistryURL, schemaID);
             } else if (streamAttributes.size() > 0) {
-                log.info("Schema Definition or Schema Registry is not specified in Stream. Hence generating " +
+                log.warn("Schema Definition or Schema Registry is not specified in Stream. Hence generating " +
                         "schema from stream attributes.");
                 RecordSchema recordSchema = new RecordSchema();
                 schema = recordSchema.generateAvroSchema(streamAttributes, streamDefinition.getId());
@@ -508,7 +508,7 @@ public class AvroSourceMapper extends SourceMapper {
                                     break;
                                 default:
                                     data[position] = null;
-                                    log.info(parser.nextToken() + " is not a valid data type for event data value. " +
+                                    log.warn(parser.nextToken() + " is not a valid data type for event data value. " +
                                              " Hence event data value is set to null");
                             }
                         } catch (IOException e) {

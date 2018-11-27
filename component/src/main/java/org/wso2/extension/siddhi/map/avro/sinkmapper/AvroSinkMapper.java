@@ -151,7 +151,7 @@ public class AvroSinkMapper extends SinkMapper {
                 SchemaRegistryReader schemaRegistryReader = new SchemaRegistryReader();
                 returnSchema = schemaRegistryReader.getSchemaFromID(schemaRegistryURL, schemaID);
             } else if (attributeList.size() > 0) {
-                log.info("Schema Definition and Schema Registry is not specified in Stream. Hence generating " +
+                log.warn("Schema Definition and Schema Registry is not specified in Stream. Hence generating " +
                         "schema from stream attributes.");
                 RecordSchema recordSchema = new RecordSchema();
                 returnSchema = recordSchema.generateAvroSchema(this.attributeList, streamName);
