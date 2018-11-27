@@ -32,13 +32,17 @@ import java.io.IOException;
 
 public class AvroSchemaDefinitions {
 
-    private static Logger log = Logger.getLogger(AvroSchemaDefinitions.class);
+    private static final Logger log = Logger.getLogger(AvroSchemaDefinitions.class);
     private static GenericRecord user;
     private static GenericRecord complexUser;
     private static GenericArray arrayOfUsers;
+    private static GenericRecord flatAvroRecord;
+    private static GenericRecord person;
     private static Schema schema;
     private static Schema complexSchema;
     private static Schema arrayschema;
+    private static Schema flatAvroSchema;
+    private static Schema registrySchema;
 
     private static String schemaDef = "{\"namespace\": \"avro.user\",\n" +
             " \"type\": \"record\",\n" +
@@ -77,9 +81,31 @@ public class AvroSchemaDefinitions {
             "   ]\n" +
             "}\n";
 
+
+    private static String complexSchemaDef2 = "{\n" +
+            "    \"type\" : \"record\",\n" +
+            "    \"name\" : \"userInfo\",\n" +
+            "    \"namespace\" : \"avro.userInfo\",\n" +
+            "    \"fields\" : [{\"name\" : \"username\",\"type\" : \"string\"},\n" +
+            "                  {\"name\" : \"age\",\"type\" : \"int\"},\n" +
+            "                  {\"name\" : \"address\", \"type\" :{\"type\":\"record\",\n" +
+            "                                                     \"name\":\"addressField\",\n" +
+            "                                                     \"fields\":[\n" +
+            "                                                     {\"name\":\"street\",\"type\":\"string\"},\n" +
+            "                                                     {\"name\":\"city\",\"type\": \"string\" } \n" +
+            "            ]\n" +
+            "        } },\n" +
+            "                 {\"name\" : \"gender\",\"type\" : \"string\"}\n" +
+            "   ]\n" +
+            "}\n";
+
     private static String arraySchema = "{ \"type\":\"array\",\"items\":{\"type\":\"record\",\"name\": " +
             "\"user\",\"fields\":[{\"name\":\"name\",\"type\":\"string\"}," +
             "{\"name\":\"favorite_number\",\"type\":[\"int\", \"null\"]}]}}";
+
+
+    private static String addressSchema = "{\"type\":\"record\",\"name\":\"addressField\",\"fields\":[" +
+            "{\"name\":\"street\",\"type\":\"string\"},{\"name\":\"city\",\"type\":\"string\"}]}";
 
     private static String complexAddressSchema = "{\"type\":\"record\",\"name\":\"addressField\",\"fields\":[" +
             "{\"name\":\"street\",\"type\":\"string\"},{\"name\":\"country\",\"type\":{\"type\":\"record\",\n" +
@@ -95,6 +121,26 @@ public class AvroSchemaDefinitions {
             "                                   {\"name\":\"country\",\"type\": \"string\"}] \n" +
             "                    }";
 
+    private static String flatAvroSchemaDef = "{\"namespace\": \"avro.stock\",\n" +
+            " \"type\": \"record\",\n" +
+            " \"name\": \"stock\",\n" +
+            " \"fields\": [\n" +
+            "     {\"name\": \"symbol\", \"type\": \"string\"},\n" +
+            "     {\"name\": \"price\",  \"type\": \"float\"},\n" +
+            "     {\"name\": \"volume\", \"type\": \"double\"}\n" +
+            " ]\n" +
+            "}";
+
+    private static String registrySchemaDef = "{\"name\": \"Person\",\n" +
+            " \"type\": \"record\",\n" +
+            " \"fields\": [\n" +
+            "     {\"name\": \"firstName\", \"type\": \"string\"},\n" +
+            "     {\"name\": \"lastName\",  \"type\": \"string\"},\n" +
+            "     {\"name\": \"birthDate\",  \"type\": \"long\"}\n" +
+            " ]\n" +
+            "}";
+
+
     public static byte[] createSimpleAvroMessage() {
         schema = new Schema.Parser().
                 parse(schemaDef);
@@ -102,6 +148,16 @@ public class AvroSchemaDefinitions {
         user.put("name", "WSO2");
         user.put("favorite_number", null);
         return serializeAvroRecord(user, schema);
+    }
+
+    public static byte[] createAvroMessage() {
+        flatAvroSchema = new Schema.Parser().
+                parse(flatAvroSchemaDef);
+        flatAvroRecord = new GenericData.Record(flatAvroSchema);
+        flatAvroRecord.put("symbol", "WSO2");
+        flatAvroRecord.put("price", 102.5f);
+        flatAvroRecord.put("volume", 55.66);
+        return serializeAvroRecord(flatAvroRecord, flatAvroSchema);
     }
 
     public static byte[] createComplexAvroMessage() {
@@ -124,6 +180,22 @@ public class AvroSchemaDefinitions {
         return serializeAvroRecord(complexUser, complexSchema);
     }
 
+    public static byte[] createComplexAvroMessage2() {
+        Schema addressScheme = new Schema.Parser().parse(addressSchema);
+        GenericData.Record addressRecord = new GenericData.Record(addressScheme);
+        addressRecord.put("street", "Palm Grove");
+        addressRecord.put("city", "Colombo");
+
+        complexSchema = new Schema.Parser().parse(complexSchemaDef2);
+        complexUser = new GenericData.Record(complexSchema);
+        complexUser.put("username", "WSO2");
+        complexUser.put("age", 26);
+        complexUser.put("address", addressRecord);
+        complexUser.put("gender", "female");
+
+        return serializeAvroRecord(complexUser, complexSchema);
+    }
+
     public static byte[] createArrayOfAvroMessage() {
         schema = new Schema.Parser().
                 parse(schemaDef);
@@ -139,6 +211,16 @@ public class AvroSchemaDefinitions {
         arrayOfUsers.add(userRecord);
 
         return serializeAvroArray(arrayOfUsers, arrayschema);
+    }
+
+    public static byte[] createAvroMessagForRegistrySchema() {
+        registrySchema = new Schema.Parser().
+                parse(registrySchemaDef);
+        person = new GenericData.Record(registrySchema);
+        person.put("firstName", "WSO2");
+        person.put("lastName", "WSO2");
+        person.put("birthDate", 19931025L);
+        return serializeAvroRecord(person, registrySchema);
     }
 
     private static byte[] serializeAvroRecord(GenericRecord record, Schema schema) {
@@ -178,4 +260,7 @@ public class AvroSchemaDefinitions {
         return new Schema.Parser().parse(complexSchemaDef);
     }
 
+    public static Schema getFlatAvroSchema() {
+        return new Schema.Parser().parse(flatAvroSchemaDef);
+    }
 }

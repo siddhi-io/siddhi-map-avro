@@ -17,6 +17,8 @@
  */
 package org.wso2.extension.siddhi.map.avro.sinkmapper;
 
+import feign.FeignException;
+import org.apache.avro.SchemaParseException;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.log4j.Appender;
 import org.apache.log4j.Layout;
@@ -27,22 +29,26 @@ import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.map.avro.AvroSchemaDefinitions;
+import org.wso2.extension.siddhi.map.avro.ConnectionTestUtil;
 import org.wso2.extension.siddhi.map.avro.util.AvroMessageProcessor;
+import org.wso2.extension.siddhi.map.avro.util.schema.RecordSchema;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.stream.input.InputHandler;
+import org.wso2.siddhi.core.stream.output.StreamCallback;
+import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.core.util.transport.InMemoryBroker;
 
 import java.io.ByteArrayOutputStream;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class AvroSinkMapperTestCase {
-    private static Logger log = Logger.getLogger(AvroSinkMapperTestCase.class);
+    private static final Logger log = Logger.getLogger(AvroSinkMapperTestCase.class);
+    private static String schemaRegistryURL = "http://localhost:8081";
     private AtomicInteger count = new AtomicInteger();
     private boolean eventArrived;
     private boolean innerAssertionsPass;
@@ -54,8 +60,8 @@ public class AvroSinkMapperTestCase {
         innerAssertionsPass = false;
     }
 
-    @Test(description = "Check Avro sink maps output siddhi events to " +
-            "avro byte[] message with a flat avro schema")
+    @Test(description = "Check Avro sink maps output siddhi events to avro byte[] message " +
+            "with a flat avro schema")
     public void avroSinkMapperTest1() throws InterruptedException {
         log.info("Testing Avro Sink Mapper with flat schema structure");
         String streams = "" +
@@ -121,8 +127,8 @@ public class AvroSinkMapperTestCase {
         AssertJUnit.assertEquals(2, count.get());
     }
 
-    @Test(description = "Check Avro sink maps output siddhi events to " +
-            "avro byte[] message with a complex avro schema")
+    @Test(description = "Check Avro sink maps output siddhi events to avro byte[] message " +
+            "with a complex avro schema")
     public void avroSinkMapperTest2() throws InterruptedException {
         log.info("Testing Avro Sink Mapper with complex schema structure");
         String streams = "" +
@@ -312,7 +318,7 @@ public class AvroSinkMapperTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "Check Avro sink mapper conversion for an array of siddhi events")
+    @Test(description = "Check Avro sink mapper default conversion for an array of siddhi events")
     public void avroSinkMapperTest5() throws InterruptedException {
         log.info("Testing Avro Sink Mapper for event array");
         String streams = "" +
@@ -337,25 +343,23 @@ public class AvroSinkMapperTestCase {
         InMemoryBroker.Subscriber subscriber = new InMemoryBroker.Subscriber() {
             @Override
             public void onMessage(Object obj) {
-                if (obj instanceof List) {
-                    for (byte[] event : (List<byte[]>) obj) {
-                        Object message = AvroMessageProcessor.deserializeByteArray(event,
-                                AvroSchemaDefinitions.getFlatSchema());
-                            log.info(message);
-                            eventArrived = true;
-                            count.getAndIncrement();
-                            switch (count.get()) {
-                                case 1:
-                                    AssertJUnit.assertEquals("WSO2", ((GenericRecord) message).get("name").toString());
-                                    innerAssertionsPass = true;
-                                    break;
-                                case 2:
-                                    AssertJUnit.assertEquals("IBM", ((GenericRecord) message).get("name").toString());
-                                    innerAssertionsPass = true;
-                                    break;
-                                default:
-                                    AssertJUnit.fail();
-                        }
+                if (obj instanceof byte[]) {
+                    Object message = AvroMessageProcessor.deserializeByteArray((byte[]) obj,
+                            AvroSchemaDefinitions.getFlatSchema());
+                    log.info(message);
+                    eventArrived = true;
+                    count.getAndIncrement();
+                    switch (count.get()) {
+                        case 1:
+                            AssertJUnit.assertEquals("WSO2", ((GenericRecord) message).get("name").toString());
+                            innerAssertionsPass = true;
+                            break;
+                        case 2:
+                            AssertJUnit.assertEquals("IBM", ((GenericRecord) message).get("name").toString());
+                            innerAssertionsPass = true;
+                            break;
+                        default:
+                            AssertJUnit.fail();
                     }
                 }
             }
@@ -383,28 +387,215 @@ public class AvroSinkMapperTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "Check siddhi app creation fails when stream " +
-            "definition does not contain schema definition", expectedExceptions = SiddhiAppCreationException.class)
-    public void avroSinkMapperTest6() throws InterruptedException {
+    @Test(description = "Check siddhi app creation fails when stream definition has attributes " +
+            "of type OBJECT.", expectedExceptions =
+            {SiddhiAppCreationException.class, SchemaParseException.class})
+    public void avroSinkMapperTest6() {
         log.info("Testing Avro Sink Mapper without schema definition");
         String streams = "" +
                 "@App:name('TestApp')" +
-                "define stream FooStream (name string, favorite_number int); " +
+                "define stream FooStream (name object, favorite_number int); " +
                 "@sink(type='inMemory', topic='user', @map(type='avro'))" +
-                "define stream BarStream (name string); ";
+                "define stream BarStream (name object); ";
         String query = "" +
                 "from FooStream " +
                 "select name " +
                 "insert into BarStream; ";
         SiddhiManager siddhiManager = new SiddhiManager();
-        SiddhiAppRuntime siddhiAppRuntime = null;
+
+        Logger logger = Logger.getLogger(RecordSchema.class);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        Layout layout = new SimpleLayout();
+        Appender appender = new WriterAppender(layout, out);
+        logger.addAppender(appender);
+
+        siddhiManager.createSiddhiAppRuntime(streams + query);
+
+        AssertJUnit.assertEquals("ERROR - Stream attribute: name has data type: OBJECT " +
+                "which is not supported by avro schema generation", out.toString().trim());
+    }
+
+    @Test(description = "Check Avro sink generates avro schema from stream attributes and " +
+            "convert siddhi events to avro messages")
+    public void avroSinkMapperTest7() throws InterruptedException {
+        log.info("Testing Avro Sink Mapper with schema generation");
+        String streams = "" +
+                "@App:name('TestApp')" +
+                "define stream FooStream (symbol string, price float, volume double); " +
+                "@sink(type='inMemory', topic='stock', @map(type='avro'))" +
+                "define stream BarStream (symbol string, price float, volume double); ";
+        String query = "" +
+                "from FooStream " +
+                "select * " +
+                "insert into BarStream; ";
+        SiddhiManager siddhiManager = new SiddhiManager();
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler input = siddhiAppRuntime.getInputHandler("FooStream");
+        InMemoryBroker.Subscriber subscriber = new InMemoryBroker.Subscriber() {
+            @Override
+            public void onMessage(Object obj) {
+                Object event = AvroMessageProcessor.deserializeByteArray((byte[]) obj,
+                        AvroSchemaDefinitions.getFlatAvroSchema());
+                if (event != null) {
+                    log.info(event);
+                    eventArrived = true;
+                    count.getAndIncrement();
+                    AssertJUnit.assertEquals("WSO2", ((GenericRecord) event).get("symbol").toString());
+                    innerAssertionsPass = true;
+                }
+            }
+
+            @Override
+            public String getTopic() {
+                return "stock";
+            }
+        };
+        InMemoryBroker.subscribe(subscriber);
+
+        siddhiAppRuntime.start();
+        input.send(new Object[]{"WSO2", 102.5f, 55.66});
+        InMemoryBroker.unsubscribe(subscriber);
+        siddhiAppRuntime.shutdown();
+
+        AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(innerAssertionsPass);
+        AssertJUnit.assertEquals(1, count.get());
+    }
+
+    @Test(description = "Check Avro sink maps output siddhi events to avro byte[] message " +
+            "with custom mapping")
+    public void avroSinkMapperTest8() throws InterruptedException {
+        log.info("Testing Avro Sink Mapper with custom mapping");
+        String streams = "" +
+                "@App:name('TestApp')" +
+                "define stream FooStream (name string, age int, street string, city string, country string); " +
+                "@sink(type='inMemory', topic='user', @map(type='avro', schema.def = \"\"\"" +
+                "{\n" +
+                "    \"type\" : \"record\",\n" +
+                "    \"name\" : \"userInfo\",\n" +
+                "    \"namespace\" : \"avro.userInfo\",\n" +
+                "    \"fields\" : [{\"name\" : \"username\",\"type\" : \"string\"},\n" +
+                "                  {\"name\" : \"age\",\"type\" : \"int\"},\n" +
+                "                  {\"name\" : \"address\", \"type\" :{\"type\":\"record\",\n" +
+                "                                           \"name\":\"addressField\",\n" +
+                "                                           \"fields\":[\n" +
+                "                                           {\"name\":\"street\",\"type\":\"string\"},\n" +
+                "                                           {\"name\":\"country\",\"type\":{\"type\":\"record\",\n" +
+                "                                           \"name\":\"countryField\",\n" +
+                "                                           \"fields\":[\n" +
+                "                                           {\"name\":\"city\",\"type\":\"string\"},\n" +
+                "                                           {\"name\":\"country\",\"type\": \"string\"}]}} \n" +
+                "            ]\n" +
+                "        } }\n" +
+                "   ]\n" +
+                "}\n" +
+                "\"\"\"," +
+                "@payload(\"\"\"{\n\"username\":\"{{name}}\"\n," +
+                "\"age\":{{age}},\n" +
+                "\"address\":\n {\"street\":\"{{street}}\",\n       " +
+                "\"country\":\n{\"city\":\"{{city}}\",\n         " +
+                "\"country\":\"{{country}}\"\n      }\n" +
+                "   }\n }\"\"\")))" +
+                "define stream BarStream (name string, age int, street string, city string, country string); ";
+        String query = "" +
+                "from FooStream " +
+                "select * " +
+                "insert into BarStream; ";
+        SiddhiManager siddhiManager = new SiddhiManager();
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+
+        InMemoryBroker.Subscriber subscriber = new InMemoryBroker.Subscriber() {
+            @Override
+            public void onMessage(Object obj) {
+                if (obj instanceof byte[]) {
+                    Object message = AvroMessageProcessor.deserializeByteArray((byte[]) obj,
+                            AvroSchemaDefinitions.getComplexSchema());
+                    log.info(message);
+                    eventArrived = true;
+                    count.getAndIncrement();
+                    switch (count.get()) {
+                        case 1:
+                            AssertJUnit.assertEquals("WSO2", ((GenericRecord) message).get("username").
+                                    toString());
+                            innerAssertionsPass = true;
+                            break;
+                        case 2:
+                            AssertJUnit.assertEquals("WSO2-US", ((GenericRecord) message).get("username").
+                                    toString());
+                            innerAssertionsPass = true;
+                            break;
+                        default:
+                            AssertJUnit.fail();
+                    }
+                }
+            }
+
+            @Override
+            public String getTopic() {
+                return "user";
+            }
+        };
+        InMemoryBroker.subscribe(subscriber);
+
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
+
+        Event[] multipleEvents = new Event[2];
+        Event event0 = new Event(-1, new Object[]{"WSO2", 26, "Palm Grove", "Colombo", "SriLanka" });
+        Event event1 = new Event(-1, new Object[]{"WSO2-US", 25, "Castro Street", "Mountain View", "Canada"});
+        multipleEvents[0] = event0;
+        multipleEvents[1] = event1;
+        siddhiAppRuntime.start();
+        fooStream.send(multipleEvents);
+
+        InMemoryBroker.unsubscribe(subscriber);
+        siddhiAppRuntime.shutdown();
+
+        AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(innerAssertionsPass);
+        AssertJUnit.assertEquals(2, count.get());
+    }
+
+    @Test(description = "Check Avro sink maps siddhi events to avro message by retrieving the schema " +
+            "from schema registry.")
+    public void avroSourceMapperTest9() throws InterruptedException {
+        log.info("Testing Avro Sink Mapper with schema registry");
+        String streams = "" +
+                "@App:name('TestApp')" +
+                "define stream FooStream (username string, surname string, bDay long); " +
+                "@sink(type='inMemory', topic='stock', @map(type='avro', schema.id = '22'," +
+                "schema.registry = 'http://localhost:8081'))" +
+                "define stream BarStream (firstName string, lastName string, birthDate long); ";
+        String query = "" +
+                "from FooStream " +
+                "select * " +
+                "insert into BarStream; ";
+        SiddhiManager siddhiManager = new SiddhiManager();
         try {
-           siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-        } catch (SiddhiAppCreationException e) {
-            AssertJUnit.assertEquals("Error on 'TestApp' @ Line: 1. Position: 135, near " +
-                    "'@sink(type='inMemory', topic='user', @map(type='avro'))'. " +
-                    "Avro Schema is not specified in the stream definition. BarStream", e.getMessage());
-            throw e;
+            ConnectionTestUtil.connectToSchemaRegistry(schemaRegistryURL);
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler inputHandler = siddhiAppRuntime.getInputHandler("FooStream");
+            siddhiAppRuntime.addCallback("BarStream", new StreamCallback() {
+                @Override
+                public void receive(Event[] events) {
+                    eventArrived = true;
+                    count.addAndGet(events.length);
+                    EventPrinter.print(events);
+                    AssertJUnit.assertEquals("WSO2", events[0].getData(0));
+                    innerAssertionsPass = true;
+                }
+            });
+
+            siddhiAppRuntime.start();
+            inputHandler.send(new Object[]{"WSO2", "WSO2", 1989L});
+            siddhiAppRuntime.shutdown();
+
+            AssertJUnit.assertTrue(eventArrived);
+            AssertJUnit.assertTrue(innerAssertionsPass);
+            AssertJUnit.assertEquals(1, count.get());
+        } catch (FeignException e) {
+            log.warn("Schema Registry at " + schemaRegistryURL + " may not be available.");
         }
     }
 }
+

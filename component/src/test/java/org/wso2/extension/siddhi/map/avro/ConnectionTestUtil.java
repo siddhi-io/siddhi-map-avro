@@ -17,6 +17,11 @@
  */
 package org.wso2.extension.siddhi.map.avro;
 
+import feign.Feign;
+import feign.FeignException;
+import feign.gson.GsonDecoder;
+import feign.gson.GsonEncoder;
+import feign.okhttp.OkHttpClient;
 import kafka.admin.AdminUtils;
 import kafka.admin.RackAwareMode;
 import kafka.common.TopicExistsException;
@@ -35,6 +40,7 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.log4j.Logger;
+import org.wso2.extension.siddhi.map.avro.util.schema.SchemaRegistryClient;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -43,8 +49,8 @@ import java.util.Properties;
 /**
  * Class defining the Constants for Kafka Test cases.
  */
-public class KafkaTestUtil {
-    private static final Logger log = Logger.getLogger(KafkaTestUtil.class);
+public class ConnectionTestUtil {
+    private static final Logger log = Logger.getLogger(ConnectionTestUtil.class);
     public static final String ZK_SERVER_CON_STRING = "localhost:2181";
 
     private static GenericRecord stock;
@@ -158,5 +164,14 @@ public class KafkaTestUtil {
         } catch (InterruptedException e) {
             log.error("Thread sleep failed", e);
         }
+    }
+
+    public static void connectToSchemaRegistry(String url) throws FeignException {
+        SchemaRegistryClient registryClient = Feign.builder()
+                .client(new OkHttpClient())
+                .encoder(new GsonEncoder())
+                .decoder(new GsonDecoder())
+                .target(SchemaRegistryClient.class, url);
+        registryClient.connect();
     }
 }
