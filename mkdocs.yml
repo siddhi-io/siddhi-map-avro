@@ -28,5 +28,6 @@ extra:
 pages:
 - Welcome: index.md
 - API Docs:
+  - 1.0.0: api/1.0.0.md
   - latest: api/latest.md
 - License: license.md

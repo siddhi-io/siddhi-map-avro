@@ -12,7 +12,7 @@ Find some useful links below:
 
 ## Latest API Docs
 
-Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-avro/docs/api/1.0.0-SNAPSHOT.md">1.0.0</a>.
+Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-avro/api/1.0.0">1.0.0</a>.
 
 ## How to use
 
@@ -48,8 +48,8 @@ extension you can replace the component <a target="_blank" href="https://github
 
 ## Features
 
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-avro/docs/api/1.0.0-SNAPSHOT.md/#avro-sink-mapper">avro</a> *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sink-mapper">(Sink Mapper)</a>*<br><div style="padding-left: 1em;"><p>This extension is an Event to Avro output mapper. <br>Transports that publish  messages can utilize this extension to convert Siddhi events to Avro messages. <br>You should send Avro schema as a quoted JSON string.<br></p></div>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-avro/docs/api/1.0.0-SNAPSHOT.md/#avro-source-mapper">avro</a> *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source-mapper">(Source Mapper)</a>*<br><div style="padding-left: 1em;"><p>Avro to Event input mapper. Transports which accepts Avro messages can utilize this extension to convert the incoming Avro message to Siddhi event.<br>Users should specify the avro schema used to create avro message as a parameter in stream definition.<br>The specified avro schema is used convert the avro message into siddhi event.</p></div>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-avro/api/1.0.0/#avro-sink-mapper">avro</a> *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sink-mapper">(Sink Mapper)</a>*<br><div style="padding-left: 1em;"><p>This extension is a Siddhi Event to Avro Message output mapper.Transports that publish  messages to Avro sink can utilize this extension to convert siddhi events to Avro messages.<br>&nbsp;Users can either specify the avro schema or give the schema registry URL and schema reference id as a parameter in stream definition.<br>In case no specification of avro schema a flat avro schema of type record is generated using the stream attributes as schema fields.</p></div>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-avro/api/1.0.0/#avro-source-mapper">avro</a> *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source-mapper">(Source Mapper)</a>*<br><div style="padding-left: 1em;"><p>Avro to Event input mapper. Transports which accepts Avro messages can utilize this extension to convert the incoming Avro message to Siddhi event.<br>Users can specify the avro schema used to create avro message as a parameter in stream definition.<br>In case no specification of avro schema a flat avro schema of type record is generated using the stream attributes as schema fields.<br>The generated/specified avro schema is used to convert the avro message into siddhi event.</p></div>
 
 ## How to Contribute
 
