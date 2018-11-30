@@ -66,33 +66,35 @@ import java.util.List;
         name = "avro",
         namespace = "sourceMapper",
         description = "" +
-                "Avro to Event input mapper. Transports which accepts Avro messages can utilize this extension " +
-                "to convert the incoming Avro message to Siddhi event.\nUsers can specify the avro schema used to " +
-                "create avro message as a parameter in stream definition.\nIn case no specification of avro schema " +
-                "a flat avro schema of type record is generated using the stream attributes as schema fields.\n" +
-                "The generated/specified avro schema is used to convert the avro message into siddhi event.",
+                "This extension is an Avro to Event input mapper. Transports that accept Avro messages can utilize " +
+                "this extension to convert the incoming Avro messages to Siddhi events.\n The Avro" +
+                " schema to be used for creating Avro messages can be specified as a parameter in the stream " +
+                "definition.\n If no Avro schema is specified, a flat avro schema of the 'record' type is generated" +
+                " with the stream attributes as schema fields.\n" +
+                "The generated/specified Avro schema is used to convert Avro messages to Siddhi events.",
         parameters = {
                 @Parameter(name = "schema.def",
                         description =
-                                "Used to specify the schema of the Avro message. The full schema used to create the " +
-                                "avro message should be specified as quoted json string.",
+                                "This specifies the schema of the Avro message. The full schema used to create the " +
+                                "Avro message needs to be specified as a quoted JSON string.",
                         type = {DataType.STRING}),
                 @Parameter(name = "schema.registry",
-                        description = "Used to specify the URL of the schema registry.",
+                        description = "This specifies the URL of the schema registry.",
                         type = {DataType.STRING}),
                 @Parameter(name = "schema.id",
                         description =
-                                "Used to specify the id of the avro schema. This id is the global id returned from " +
-                                "the schema registry when posting the schema to the registry. The specified id is " +
-                                "used to retrive the schema from the schema registry.",
+                                "This specifies the ID of the Avro schema. This ID is the global ID that is " +
+                                        "returned from the schema registry when posting the schema to the registry." +
+                                        "The schema is retrieved from the schema registry via the specified ID.",
+
                         type = {DataType.STRING}),
                 @Parameter(name = "fail.on.missing.attribute",
-                        description = "This can either have value true or false. By default it will be true. \nThis " +
-                                      "attribute allows user to handle unknown attributes.\n By default if an json " +
-                                      "execution fails or returns null system will drop that message.\nHowever " +
-                                      "setting this property to false will prompt system to send event with null " +
-                                      "value to Siddhi where user can handle it accordingly.\n" +
-                                      "(ie. Assign a default value)",
+                        description = "If this parameter is set to 'true', a JSON execution failing or returning a " +
+                                "null value results in that message being dropped by the system.\n" +
+                                "If this parameter is set to 'false', a JSON execution failing or returning a " +
+                                "null value results in the system being prompted to send the event with a null " +
+                                "value to Siddhi so that the user can handle it as required (i.e., by assigning" +
+                                " a default value.",
                         type = {DataType.BOOL},
                         optional = true,
                         defaultValue = "true")
@@ -103,29 +105,29 @@ import java.util.List;
                                 "{\"type\":\"record\",\"name\":\"userInfo\",\"namespace\":\"user.example\",\"fields\"" +
                                 ":[{\"name\":\"name\",\"type\":\"string\"}, {\"name\":\"age\",\"type\":\"int\"}]}" +
                                 "\"\"\"))\n"
-                                + "define stream userStream (name string, age int );\n",
-                        description = "Above configuration will do a default Avro input mapping. The input avro " +
-                                      "message containing user info will be converted to a siddhi event.\n" +
-                                      "Expected input is a byte array."),
+                                + "define stream UserStream (name string, age int );\n",
+                        description = "The above Siddhi query performs a default Avro input mapping. The input Avro " +
+                                      "message that contains user information is converted to a Siddhi event.\n" +
+                                      "The expected input is a byte array."),
                 @Example(
                         syntax = "@source(type='inMemory', topic='user', @map(type='avro', schema .def = \"\"\"" +
                                 "{\"type\":\"record\",\"name\":\"userInfo\",\"namespace\":\"avro.userInfo\"," +
                                 "\"fields\":[{\"name\":\"username\",\"type\":\"string\"}, {\"name\":\"age\"," +
                                 "\"type\":\"int\"}]}\"\"\",@attributes(name=\"username\",age=\"age\")))\n" +
                                 "define stream userStream (name string, age int );\n",
-                        description = "Above configuration will do a custom Avro input mapping. " +
-                                "The input avro message containing user info will be " +
-                                "converted  to a siddhi event.\n " +
-                                "Expected input is a byte array."),
+                        description = "The above Siddhi query performs a custom Avro input mapping. " +
+                                "The input Avro message that contains user information is converted  to a Siddhi" +
+                                " event.\n " +
+                                "The expected input is a byte array."),
                 @Example(
                         syntax = "@source(type='inMemory', topic='user', @map(type='avro'," +
                                 "schema.registry='http://192.168.2.5:9090', schema.id='1'," +
                                 "@attributes(name=\"username\",age=\"age\")))\n" +
-                                "define stream userStream (name string, age int );\n",
-                        description = "Above configuration will do a custom Avro input mapping. The input avro " +
-                                      "message containing user info will be converted to a siddhi event using the " +
-                                      "schema retrived from given schema registry(localhost:8081).\n" +
-                                      "Expected input is a byte array.")
+                                "define stream UserStream (name string, age int );\n",
+                        description = "The above Siddhi query performs a custom Avro input mapping. The input Avro " +
+                                      "message that contains user information is converted to a Siddhi event via the " +
+                                      "schema retrieved from the given schema registry(localhost:8081).\n" +
+                                      "The expected input is a byte array.")
         }
 )
 
