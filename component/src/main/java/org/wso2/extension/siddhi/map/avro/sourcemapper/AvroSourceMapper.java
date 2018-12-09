@@ -84,7 +84,7 @@ import java.util.List;
                 @Parameter(name = "schema.id",
                         description =
                                 "This specifies the ID of the Avro schema. This ID is the global ID that is " +
-                                        "returned from the schema registry when posting the schema to the registry." +
+                                        "returned from the schema registry when posting the schema to the registry. " +
                                         "The schema is retrieved from the schema registry via the specified ID.",
 
                         type = {DataType.STRING}),
