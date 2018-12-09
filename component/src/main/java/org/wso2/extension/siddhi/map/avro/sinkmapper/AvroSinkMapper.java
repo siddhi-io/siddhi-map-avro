@@ -55,24 +55,24 @@ import java.util.Map;
         namespace = "sinkMapper",
         description = "" +
                 "This extension is a Siddhi Event to Avro Message output mapper." +
-                "Transports that publish  messages to Avro sink can utilize this extension to convert siddhi " +
-                "events to Avro messages.\n Users can either specify the avro schema or give the schema registry " +
-                "URL and schema reference id as a parameter in stream definition.\n" +
-                "In case no specification of avro schema a flat avro schema of type record is generated using " +
+                "Transports that publish  messages to Avro sink can utilize this extension to convert Siddhi " +
+                "events to Avro messages.\n You can either specify the Avro schema or provide the schema registry " +
+                "URL and the schema reference ID as parameters in the stream definition.\n" +
+                "If no Avro schema is specified, a flat Avro schema of the 'record' type is generated with " +
                 "the stream attributes as schema fields.",
         parameters = {
                 @Parameter(name = "schema.def",
-                        description = "This specifies the desired avro schema to be used to convert siddhi " +
-                                        "events to avro message.\n" +
-                                "The schema should be specified as a quoted json string.",
+                        description = "This specifies the required Avro schema to be used to convert Siddhi " +
+                                        "events to Avro messages.\n" +
+                                "The schema needs to be specified as a quoted JSON string.",
                         type = {DataType.STRING}),
                 @Parameter(name = "schema.registry",
-                        description = "Used to specify the URL of the schema registry.",
+                        description = "This specifies the URL of the schema registry.",
                         type = {DataType.STRING}),
                 @Parameter(name = "schema.id",
-                        description = "Used to specify the id of the avro schema. This id is the global id " +
+                        description = "This specifies the ID of the avro schema. This ID is the global ID that is " +
                                 "returned from the schema registry when posting the schema to the registry. " +
-                                "The specified id is used to retrive the schema from the schema registry.",
+                                "The specified ID is used to retrieve the schema from the schema registry.",
                         type = {DataType.STRING})
         },
         examples = {
@@ -82,19 +82,19 @@ import java.util.Map;
                                 "\"namespace\":\"stock.example\",\"fields\":[{\"name\":\"symbol\"," +
                                 "\"type\":\"string\"},{\"name\":\"price\":\"type\":\"float\"}," +
                                  "{\"name\":\"volume\",\"type\":\"long\"}]}\"\"\"))\n" +
-                                 "define stream stockStream (symbol string, price float, volume long);",
+                                 "define stream StockStream (symbol string, price float, volume long);",
                         description = "The above configuration performs a default Avro mapping that generates " +
-                                      "an Avro message as output byte array."),
+                                      "an Avro message as an output byte array."),
                 @Example(
                         syntax = "@sink(type='inMemory', topic='stock', @map(type='avro'," +
                                 "schema.registry = 'http://localhost:8081', schema.id ='22'," +
                                 "@payload(\"\"\"{\"Symbol\":{{symbol}},\"Price\":{{price}}," +
                                 "\"Volume\":{{volume}}}\"\"\"\n" +
                                 ")))\n" +
-                                "define stream stockStream (symbol string, price float, volume long);",
+                                "define stream StockStream (symbol string, price float, volume long);",
                         description = "The above configuration performs a custom Avro mapping that generates " +
-                                      "an Avro message as output byte array. The avro schema is retrieved " +
-                                      "from the given schema registry(localhost:8081) using the provided schema id.")
+                                      "an Avro message as an output byte array. The Avro schema is retrieved " +
+                                      "from the given schema registry (localhost:8081) using the schema ID provided.")
         }
 )
 
