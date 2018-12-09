@@ -41,6 +41,7 @@ import org.wso2.siddhi.core.util.transport.TemplateBuilder;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -63,7 +64,7 @@ import java.util.Map;
         parameters = {
                 @Parameter(name = "schema.def",
                         description = "This specifies the required Avro schema to be used to convert Siddhi " +
-                                        "events to Avro messages.\n" +
+                                "events to Avro messages.\n" +
                                 "The schema needs to be specified as a quoted JSON string.",
                         type = {DataType.STRING}),
                 @Parameter(name = "schema.registry",
@@ -78,13 +79,13 @@ import java.util.Map;
         examples = {
                 @Example(
                         syntax = "@sink(type='inMemory', topic='stock', @map(type='avro'," +
-                                 "schema.def = \"\"\"{\"type\":\"record\",\"name\":\"stock\"," +
+                                "schema.def = \"\"\"{\"type\":\"record\",\"name\":\"stock\"," +
                                 "\"namespace\":\"stock.example\",\"fields\":[{\"name\":\"symbol\"," +
                                 "\"type\":\"string\"},{\"name\":\"price\":\"type\":\"float\"}," +
-                                 "{\"name\":\"volume\",\"type\":\"long\"}]}\"\"\"))\n" +
-                                 "define stream StockStream (symbol string, price float, volume long);",
+                                "{\"name\":\"volume\",\"type\":\"long\"}]}\"\"\"))\n" +
+                                "define stream StockStream (symbol string, price float, volume long);",
                         description = "The above configuration performs a default Avro mapping that generates " +
-                                      "an Avro message as an output byte array."),
+                                "an Avro message as an output ByteBuffer."),
                 @Example(
                         syntax = "@sink(type='inMemory', topic='stock', @map(type='avro'," +
                                 "schema.registry = 'http://localhost:8081', schema.id ='22'," +
@@ -93,8 +94,8 @@ import java.util.Map;
                                 ")))\n" +
                                 "define stream StockStream (symbol string, price float, volume long);",
                         description = "The above configuration performs a custom Avro mapping that generates " +
-                                      "an Avro message as an output byte array. The Avro schema is retrieved " +
-                                      "from the given schema registry (localhost:8081) using the schema ID provided.")
+                                "an Avro message as an output ByteBuffer. The Avro schema is retrieved " +
+                                "from the given schema registry (localhost:8081) using the schema ID provided.")
         }
 )
 
@@ -109,7 +110,7 @@ public class AvroSinkMapper extends SinkMapper {
     private String[] attributeNameArray;
     private Schema schema;
     private List<Attribute> attributeList;
-    
+
     /**
      * Initialize the mapper and the mapping configurations.
      *
@@ -133,7 +134,7 @@ public class AvroSinkMapper extends SinkMapper {
             throw new SiddhiAppCreationException("Avro sink-mapper does not support object @payload mappings, " +
                     "error at the mapper of '" + streamDefinition.getId() + "'");
         }
-        schema = getAvroSchema (optionHolder.validateAndGetStaticValue(DEFAULT_AVRO_MAPPING_PREFIX.concat(".").
+        schema = getAvroSchema(optionHolder.validateAndGetStaticValue(DEFAULT_AVRO_MAPPING_PREFIX.concat(".").
                         concat(SCHEMA_IDENTIFIER), null),
                 optionHolder.validateAndGetStaticValue(DEFAULT_AVRO_MAPPING_PREFIX.concat(".").
                         concat(SCHEMA_REGISTRY), null),
@@ -141,8 +142,8 @@ public class AvroSinkMapper extends SinkMapper {
                         concat(SCHEMA_ID), null), streamDefinition.getId());
     }
 
-    private Schema getAvroSchema(String schemaDefinition,  String schemaRegistryURL, String schemaID,
-            String streamName) {
+    private Schema getAvroSchema(String schemaDefinition, String schemaRegistryURL, String schemaID,
+                                 String streamName) {
         Schema returnSchema = null;
         try {
             if (schemaDefinition != null) {
@@ -176,14 +177,14 @@ public class AvroSinkMapper extends SinkMapper {
     public void mapAndSend(Event[] events, OptionHolder optionHolder, Map<String, TemplateBuilder>
             payloadTemplateBuilderMap, SinkListener sinkListener) {
         List<byte[]> data = new ArrayList<>();
-        for (Event event: events) {
+        for (Event event : events) {
             byte[] returnedData = mapSingleEvent(event, payloadTemplateBuilderMap);
             if (returnedData != null) {
                 data.add(returnedData);
             }
         }
-        for (byte[] message: data) {
-            sinkListener.publish(message);
+        for (byte[] message : data) {
+            sinkListener.publish(ByteBuffer.wrap(message));
         }
     }
 
@@ -193,7 +194,7 @@ public class AvroSinkMapper extends SinkMapper {
         byte[] data = null;
         data = mapSingleEvent(event, payloadTemplateBuilderMap);
         if (data != null) {
-            sinkListener.publish(data);
+            sinkListener.publish(ByteBuffer.wrap(data));
         }
     }
 
@@ -290,7 +291,7 @@ public class AvroSinkMapper extends SinkMapper {
 
     @Override
     public Class[] getOutputEventClasses() {
-        return new Class[]{byte[].class};
+        return new Class[]{ByteBuffer.class};
     }
 
     @Override

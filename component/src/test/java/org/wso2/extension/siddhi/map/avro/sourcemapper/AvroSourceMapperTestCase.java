@@ -40,6 +40,7 @@ import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.core.util.transport.InMemoryBroker;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class AvroSourceMapperTestCase {
@@ -92,7 +93,7 @@ public class AvroSourceMapperTestCase {
 
         byte[] data = AvroSchemaDefinitions.createSimpleAvroMessage();
         siddhiAppRuntime.start();
-        InMemoryBroker.publish("user", data);
+        InMemoryBroker.publish("user", ByteBuffer.wrap(data));
         siddhiAppRuntime.shutdown();
 
         AssertJUnit.assertTrue(eventArrived);
@@ -149,7 +150,7 @@ public class AvroSourceMapperTestCase {
         byte[] data = AvroSchemaDefinitions.createComplexAvroMessage();
 
         siddhiAppRuntime.start();
-        InMemoryBroker.publish("userInfo", data);
+        InMemoryBroker.publish("userInfo", ByteBuffer.wrap(data));
         siddhiAppRuntime.shutdown();
 
         AssertJUnit.assertTrue(eventArrived);
@@ -191,7 +192,7 @@ public class AvroSourceMapperTestCase {
 
         byte[] data = AvroSchemaDefinitions.createArrayOfAvroMessage();
         siddhiAppRuntime.start();
-        InMemoryBroker.publish("stock", data);
+        InMemoryBroker.publish("stock", ByteBuffer.wrap(data));
         siddhiAppRuntime.shutdown();
 
         AssertJUnit.assertTrue(eventArrived);
@@ -294,7 +295,7 @@ public class AvroSourceMapperTestCase {
         logger.addAppender(appender);
 
         siddhiAppRuntime.start();
-        InMemoryBroker.publish("user", data);
+        InMemoryBroker.publish("user", ByteBuffer.wrap(data));
 
         AssertJUnit.assertEquals("ERROR - Error occured when deserializing avro byte stream " +
                 "conforming to schema {\"type\":\"record\",\"name\":\"user\",\"namespace\":\"avro.user\"," +
@@ -331,7 +332,7 @@ public class AvroSourceMapperTestCase {
 
         byte[] data = AvroSchemaDefinitions.createAvroMessage();
         siddhiAppRuntime.start();
-        InMemoryBroker.publish("user", data);
+        InMemoryBroker.publish("user", ByteBuffer.wrap(data));
         siddhiAppRuntime.shutdown();
 
         AssertJUnit.assertTrue(eventArrived);
@@ -409,7 +410,7 @@ public class AvroSourceMapperTestCase {
         byte[] data = AvroSchemaDefinitions.createComplexAvroMessage();
 
         siddhiAppRuntime.start();
-        InMemoryBroker.publish("userInfo", data);
+        InMemoryBroker.publish("userInfo", ByteBuffer.wrap(data));
         siddhiAppRuntime.shutdown();
 
         AssertJUnit.assertTrue(eventArrived);
@@ -459,7 +460,7 @@ public class AvroSourceMapperTestCase {
         byte[] data = AvroSchemaDefinitions.createComplexAvroMessage2();
 
         siddhiAppRuntime.start();
-        InMemoryBroker.publish("userInfo", data);
+        InMemoryBroker.publish("userInfo", ByteBuffer.wrap(data));
         siddhiAppRuntime.shutdown();
 
         AssertJUnit.assertTrue(eventArrived);
@@ -498,7 +499,7 @@ public class AvroSourceMapperTestCase {
 
         byte[] data = AvroSchemaDefinitions.createArrayOfAvroMessage();
         siddhiAppRuntime.start();
-        InMemoryBroker.publish("stock", data);
+        InMemoryBroker.publish("stock", ByteBuffer.wrap(data));
         siddhiAppRuntime.shutdown();
 
         AssertJUnit.assertTrue(eventArrived);
@@ -537,7 +538,7 @@ public class AvroSourceMapperTestCase {
 
             byte[] data = AvroSchemaDefinitions.createAvroMessagForRegistrySchema();
             siddhiAppRuntime.start();
-            InMemoryBroker.publish("stock", data);
+            InMemoryBroker.publish("stock", ByteBuffer.wrap(data));
             siddhiAppRuntime.shutdown();
 
             AssertJUnit.assertTrue(eventArrived);
