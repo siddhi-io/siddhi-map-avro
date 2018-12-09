@@ -102,7 +102,7 @@ define stream StockStream (symbol string, price float, volume long);
     </tr>
     <tr>
         <td style="vertical-align: top">schema.id</td>
-        <td style="vertical-align: top; word-wrap: break-word">This specifies the ID of the Avro schema. This ID is the global ID that is returned from the schema registry when posting the schema to the registry.The schema is retrieved from the schema registry via the specified ID.</td>
+        <td style="vertical-align: top; word-wrap: break-word">This specifies the ID of the Avro schema. This ID is the global ID that is returned from the schema registry when posting the schema to the registry. The schema is retrieved from the schema registry via the specified ID.</td>
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">No</td>

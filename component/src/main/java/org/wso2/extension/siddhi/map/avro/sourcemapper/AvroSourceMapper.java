@@ -54,6 +54,7 @@ import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -76,7 +77,7 @@ import java.util.List;
                 @Parameter(name = "schema.def",
                         description =
                                 "This specifies the schema of the Avro message. The full schema used to create the " +
-                                "Avro message needs to be specified as a quoted JSON string.",
+                                        "Avro message needs to be specified as a quoted JSON string.",
                         type = {DataType.STRING}),
                 @Parameter(name = "schema.registry",
                         description = "This specifies the URL of the schema registry.",
@@ -107,8 +108,8 @@ import java.util.List;
                                 "\"\"\"))\n"
                                 + "define stream UserStream (name string, age int );\n",
                         description = "The above Siddhi query performs a default Avro input mapping. The input Avro " +
-                                      "message that contains user information is converted to a Siddhi event.\n" +
-                                      "The expected input is a byte array."),
+                                "message that contains user information is converted to a Siddhi event.\n" +
+                                "The expected input is a byte array or ByteBuffer."),
                 @Example(
                         syntax = "@source(type='inMemory', topic='user', @map(type='avro', schema .def = \"\"\"" +
                                 "{\"type\":\"record\",\"name\":\"userInfo\",\"namespace\":\"avro.userInfo\"," +
@@ -118,16 +119,16 @@ import java.util.List;
                         description = "The above Siddhi query performs a custom Avro input mapping. " +
                                 "The input Avro message that contains user information is converted  to a Siddhi" +
                                 " event.\n " +
-                                "The expected input is a byte array."),
+                                "The expected input is a byte array or ByteBuffer."),
                 @Example(
                         syntax = "@source(type='inMemory', topic='user', @map(type='avro'," +
                                 "schema.registry='http://192.168.2.5:9090', schema.id='1'," +
                                 "@attributes(name=\"username\",age=\"age\")))\n" +
                                 "define stream UserStream (name string, age int );\n",
                         description = "The above Siddhi query performs a custom Avro input mapping. The input Avro " +
-                                      "message that contains user information is converted to a Siddhi event via the " +
-                                      "schema retrieved from the given schema registry(localhost:8081).\n" +
-                                      "The expected input is a byte array.")
+                                "message that contains user information is converted to a Siddhi event via the " +
+                                "schema retrieved from the given schema registry(localhost:8081).\n" +
+                                "The expected input is a byte array or ByteBuffer.")
         }
 )
 
@@ -224,7 +225,7 @@ public class AvroSourceMapper extends SourceMapper {
      * Receives an event or events as a byte[] from source, converts it to
      * a {@link org.wso2.siddhi.core.event.ComplexEventChunk}.
      *
-     * @param eventObject       the input, given as a byte array
+     * @param eventObject       the input, given as a byte array or ByteBuffer
      * @param inputEventHandler input handler
      */
     @Override
@@ -243,45 +244,49 @@ public class AvroSourceMapper extends SourceMapper {
     }
 
     private Event[] convertToEvents(Object eventObject) {
-        Object jsonObj = null;
-        Object avroObj;
-        String avroMessage;
-
+        byte[] binaryEvent;
         if (eventObject instanceof byte[]) {
-            try {
-                jsonObj = AvroMessageProcessor.deserializeByteArray((byte[]) eventObject, schema);
-            } catch (Throwable t) {
-                log.error("Error when converting avro message of schema: " + schema.toString() +
-                        " to siddhi event. " + t.getMessage() + ". Hence dropping the event.");
-                return null;
-            }
+            binaryEvent = (byte[]) eventObject;
+        } else if (eventObject instanceof ByteBuffer) {
+            binaryEvent = ((ByteBuffer) eventObject).array();
+        } else {
+            log.error("Event object is invalid. Expected byte Array or ByteBuffer, but found "
+                    + eventObject.getClass().getCanonicalName());
+            return null;
+        }
 
-            if (jsonObj != null) {
-                avroMessage = jsonObj.toString();
-                if (!isJsonValid(avroMessage)) {
-                    log.error("Invalid Avro message :" + avroMessage + " for schema " + schema.toString());
-                } else {
-                    ReadContext readContext = JsonPath.parse(avroMessage);
-                    avroObj = readContext.read(DEFAULT_JSON_PATH);
-                    if (avroObj instanceof JSONArray) {
-                        JsonObject[] eventObjects = gson.fromJson(avroMessage, JsonObject[].class);
-                        if (isCustomMappingEnabled) {
-                            return convertToEventArrayForCustomMapping(eventObjects);
-                        } else {
-                            return convertToEventArrayForDefaultMapping(eventObjects);
-                        }
+
+        Object jsonObj;
+        try {
+            jsonObj = AvroMessageProcessor.deserializeByteArray(binaryEvent, schema);
+        } catch (Throwable t) {
+            log.error("Error when converting avro message of schema: " + schema.toString() +
+                    " to siddhi event. " + t.getMessage() + ". Hence dropping the event.");
+            return null;
+        }
+
+        if (jsonObj != null) {
+            String avroMessage = jsonObj.toString();
+            if (!isJsonValid(avroMessage)) {
+                log.error("Invalid Avro message :" + avroMessage + " for schema " + schema.toString());
+            } else {
+                ReadContext readContext = JsonPath.parse(avroMessage);
+                Object avroObj = readContext.read(DEFAULT_JSON_PATH);
+                if (avroObj instanceof JSONArray) {
+                    JsonObject[] eventObjects = gson.fromJson(avroMessage, JsonObject[].class);
+                    if (isCustomMappingEnabled) {
+                        return convertToEventArrayForCustomMapping(eventObjects);
                     } else {
-                        if (isCustomMappingEnabled) {
-                            return convertToSingleEventForCustomMapping(avroMessage);
-                        } else {
-                            return convertToSingleEventForDefaultMapping(avroMessage);
-                        }
+                        return convertToEventArrayForDefaultMapping(eventObjects);
+                    }
+                } else {
+                    if (isCustomMappingEnabled) {
+                        return convertToSingleEventForCustomMapping(avroMessage);
+                    } else {
+                        return convertToSingleEventForDefaultMapping(avroMessage);
                     }
                 }
             }
-        } else {
-            log.error("Event object is invalid. Expected Byte Array, but found "
-                    + eventObject.getClass().getCanonicalName());
         }
         return null;
     }
@@ -313,7 +318,7 @@ public class AvroSourceMapper extends SourceMapper {
      * The method returns a null instead of a byte[0] to enhance the performance.
      * Creation of empty byte array and length > 0 check for each event conversion is costly
      */
-    private Event[] convertToSingleEventForDefaultMapping(String avroMessage)  {
+    private Event[] convertToSingleEventForDefaultMapping(String avroMessage) {
         List<Event> eventList = new ArrayList<>();
         Event event = new Event(streamAttributesSize);
         Object[] data = event.getData();
@@ -438,7 +443,7 @@ public class AvroSourceMapper extends SourceMapper {
                     }
                 }
             } catch (IOException e) {
-                log.error ("Avro message " + avroMessage + " cannot be converted to siddhi event.");
+                log.error("Avro message " + avroMessage + " cannot be converted to siddhi event.");
                 return null;
             }
         }
@@ -511,7 +516,7 @@ public class AvroSourceMapper extends SourceMapper {
                                 default:
                                     data[position] = null;
                                     log.warn(parser.nextToken() + " is not a valid data type for event data value. " +
-                                             " Hence event data value is set to null");
+                                            " Hence event data value is set to null");
                             }
                         } catch (IOException e) {
                             throw new SiddhiAppRuntimeException("Initializing a parser failed for the event string."
@@ -525,7 +530,7 @@ public class AvroSourceMapper extends SourceMapper {
             } catch (PathNotFoundException e) {
                 if (failOnMissingAttribute) {
                     log.error("Json message " + childObject.toString() +
-                             "contains missing attributes. Hence dropping the message.");
+                            "contains missing attributes. Hence dropping the message.");
                     return null;
                 }
                 data[position] = null;
@@ -603,7 +608,7 @@ public class AvroSourceMapper extends SourceMapper {
 
     @Override
     public Class[] getSupportedInputEventClasses() {
-        return new Class[]{String.class, byte[].class};
+        return new Class[]{ByteBuffer.class, byte[].class};
     }
 
     @Override

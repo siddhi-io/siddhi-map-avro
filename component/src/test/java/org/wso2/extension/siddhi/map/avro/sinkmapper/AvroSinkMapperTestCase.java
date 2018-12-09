@@ -42,6 +42,7 @@ import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.core.util.transport.InMemoryBroker;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -86,7 +87,7 @@ public class AvroSinkMapperTestCase {
         InMemoryBroker.Subscriber subscriber = new InMemoryBroker.Subscriber() {
             @Override
             public void onMessage(Object o) {
-                Object events = AvroMessageProcessor.deserializeByteArray((byte[]) o,
+                Object events = AvroMessageProcessor.deserializeByteArray(((ByteBuffer) o).array(),
                         AvroSchemaDefinitions.getFlatSchema());
                 if (events != null) {
                     log.info(events);
@@ -164,7 +165,7 @@ public class AvroSinkMapperTestCase {
         InMemoryBroker.Subscriber subscriber = new InMemoryBroker.Subscriber() {
             @Override
             public void onMessage(Object obj) {
-                Object events = AvroMessageProcessor.deserializeByteArray((byte[]) obj,
+                Object events = AvroMessageProcessor.deserializeByteArray(((ByteBuffer) obj).array(),
                         AvroSchemaDefinitions.getComplexSchema());
                 if (events != null) {
                     log.info(events);
@@ -343,8 +344,8 @@ public class AvroSinkMapperTestCase {
         InMemoryBroker.Subscriber subscriber = new InMemoryBroker.Subscriber() {
             @Override
             public void onMessage(Object obj) {
-                if (obj instanceof byte[]) {
-                    Object message = AvroMessageProcessor.deserializeByteArray((byte[]) obj,
+                if (obj instanceof ByteBuffer) {
+                    Object message = AvroMessageProcessor.deserializeByteArray(((ByteBuffer) obj).array(),
                             AvroSchemaDefinitions.getFlatSchema());
                     log.info(message);
                     eventArrived = true;
@@ -434,7 +435,7 @@ public class AvroSinkMapperTestCase {
         InMemoryBroker.Subscriber subscriber = new InMemoryBroker.Subscriber() {
             @Override
             public void onMessage(Object obj) {
-                Object event = AvroMessageProcessor.deserializeByteArray((byte[]) obj,
+                Object event = AvroMessageProcessor.deserializeByteArray(((ByteBuffer) obj).array(),
                         AvroSchemaDefinitions.getFlatAvroSchema());
                 if (event != null) {
                     log.info(event);
@@ -507,8 +508,8 @@ public class AvroSinkMapperTestCase {
         InMemoryBroker.Subscriber subscriber = new InMemoryBroker.Subscriber() {
             @Override
             public void onMessage(Object obj) {
-                if (obj instanceof byte[]) {
-                    Object message = AvroMessageProcessor.deserializeByteArray((byte[]) obj,
+                if (obj instanceof ByteBuffer) {
+                    Object message = AvroMessageProcessor.deserializeByteArray(((ByteBuffer) obj).array(),
                             AvroSchemaDefinitions.getComplexSchema());
                     log.info(message);
                     eventArrived = true;
@@ -541,7 +542,7 @@ public class AvroSinkMapperTestCase {
         siddhiAppRuntime.start();
 
         Event[] multipleEvents = new Event[2];
-        Event event0 = new Event(-1, new Object[]{"WSO2", 26, "Palm Grove", "Colombo", "SriLanka" });
+        Event event0 = new Event(-1, new Object[]{"WSO2", 26, "Palm Grove", "Colombo", "SriLanka"});
         Event event1 = new Event(-1, new Object[]{"WSO2-US", 25, "Castro Street", "Mountain View", "Canada"});
         multipleEvents[0] = event0;
         multipleEvents[1] = event1;
