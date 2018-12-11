@@ -177,42 +177,46 @@
                             org.apache.commons.compress.compressors.*,
                             org.joda.time.*,
                             org.xerial.snappy.*,
+                            org.apache.commons.compress.archivers.*
                         </Private-Package>
                         <Export-Package>
                             org.wso2.extension.siddhi.map.avro.*
                         </Export-Package>
                         <Import-Package>
-                            com.fasterxml.jackson.databind;resolution:=optional;vers
-                            ion="[2.7,3)",com.fasterxml.jackson.databind.node;resolution:=optional;
-                            version="[2.7,3)",com.fasterxml.jackson.databind.type;resolution:=optio
-                            nal;version="[2.7,3)",feign;resolution:=optional;version="[9.5,10)",fei
-                            gn.codec;resolution:=optional;version="[9.5,10)",feign.gson;resolution:
-                            =optional;version="[9.5,10)",feign.okhttp;resolution:=optional;version=
-                            "[9.5,10)",javax.annotation;resolution:=optional,javax.inject;resolutio
-                            n:=optional,javax.xml.datatype;resolution:=optional,javax.xml.namespace
-                            ;resolution:=optional,javax.xml.parsers;resolution:=optional,org.apache
-                            .commons.compress.archivers;resolution:=optional;version="[1.8,2)",org.
-                            apache.log4j;resolution:=optional;version="[1.2,2)",org.apache.tapestry
-                            5.json;resolution:=optional,org.joda.time;resolution:=optional,org.joda
-                            .time.format;resolution:=optional,org.json;resolution:=optional,org.osg
-                            i.framework;resolution:=optional;version="[1.8,2)",org.slf4j;resolution
-                            :=optional;version="[1.7,2)",org.tukaani.xz;resolution:=optional,org.w3
-                            c.dom;resolution:=optional,org.w3c.dom.bootstrap;resolution:=optional,o
-                            rg.w3c.dom.ls;resolution:=optional,org.wso2.siddhi.annotation;resolutio
-                            n:=optional;version="[4.2,5)",org.wso2.siddhi.annotation.util;resolutio
-                            n:=optional;version="[4.2,5)",org.wso2.siddhi.core.config;resolution:=o
-                            ptional;version="[4.2,5)",org.wso2.siddhi.core.event;resolution:=option
-                            al;version="[4.2,5)",org.wso2.siddhi.core.exception;resolution:=optiona
-                            l;version="[4.2,5)",org.wso2.siddhi.core.stream.input.source;resolution
-                            :=optional;version="[4.2,5)",org.wso2.siddhi.core.stream.output.sink;re
-                            solution:=optional;version="[4.2,5)",org.wso2.siddhi.core.util;resoluti
-                            on:=optional;version="[4.2,5)",org.wso2.siddhi.core.util.config;resolut
-                            ion:=optional;version="[4.2,5)",org.wso2.siddhi.core.util.transport;res
-                            olution:=optional;version="[4.2,5)",org.wso2.siddhi.query.api.definitio
-                            n;resolution:=optional;version="[4.2,5)",org.xml.sax;resolution:=option
-                            al,sun.misc;resolution:=optional
-                            <!--*;resolution:=optional-->
-                        </Import-Package>
+                            com.fasterxml.jackson.databind;resolution:=optional;version="${com.fasterxml.jackson.databind.range}",
+                            com.fasterxml.jackson.databind.node;resolution:=optional;version="${com.fasterxml.jackson.databind.range}",
+                            com.fasterxml.jackson.databind.type;resolution:=optional;version="${com.fasterxml.jackson.databind.range}",
+                            feign;resolution:=optional;version="${feign.version.range}",
+                            feign.codec;resolution:=optional;version="${feign.version.range}",
+                            feign.gson;resolution:=optional;version="${feign.version.range}",
+                            feign.okhttp;resolution:=optional;version="${feign.version.range}",
+                            javax.annotation;resolution:=optional,
+                            javax.inject;resolution:=optional,
+                            javax.xml.datatype;resolution:=optional,
+                            javax.xml.namespace;resolution:=optional,
+                            javax.xml.parsers;resolution:=optional,
+                            org.apache.log4j;resolution:=optional;version="${org.apache.log4j.version.range}",
+                            org.json;resolution:=optional,
+                            org.osgi.framework;resolution:=optional;version="${org.osgi.framework.version.range}",
+                            org.slf4j;resolution:=optional;version="${org.slf4j.version.range}",
+                            org.tukaani.xz;resolution:=optional,
+                            org.w3c.dom;resolution:=optional,
+                            org.w3c.dom.bootstrap;resolution:=optional,
+                            org.w3c.dom.ls;resolution:=optional,
+                            org.wso2.siddhi.annotation;resolution:=optional;version="${org.wso2.siddhi.version.range}",
+                            org.wso2.siddhi.annotation.util;resolution:=optional;version="${org.wso2.siddhi.version.range}",
+                            org.wso2.siddhi.core.config;resolution:=optional;version="${org.wso2.siddhi.version.range}",
+                            org.wso2.siddhi.core.event;resolution:=optional;version="${org.wso2.siddhi.version.range}",
+                            org.wso2.siddhi.core.exception;resolution:=optional;version="${org.wso2.siddhi.version.range}",
+                            org.wso2.siddhi.core.stream.input.source;resolution:=optional;version="${org.wso2.siddhi.version.range}",
+                            org.wso2.siddhi.core.stream.output.sink;resolution:=optional;version="${org.wso2.siddhi.version.range}",
+                            org.wso2.siddhi.core.util;resolution:=optional;version="${org.wso2.siddhi.version.range}",
+                            org.wso2.siddhi.core.util.config;resolution:=optional;version="${org.wso2.siddhi.version.range}",
+                            org.wso2.siddhi.core.util.transport;resolution:=optional;version="${org.wso2.siddhi.version.range}",
+                            org.wso2.siddhi.query.api.definition;resolution:=optional;version="${org.wso2.siddhi.version.range}",
+                            org.xml.sax;resolution:=optional,
+                            sun.misc;resolution:=optional
+                    </Import-Package>
                         <Include-Resource>
                             META-INF=target/classes/META-INF
                         </Include-Resource>
