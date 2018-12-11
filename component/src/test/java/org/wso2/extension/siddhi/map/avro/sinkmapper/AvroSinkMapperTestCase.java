@@ -559,7 +559,7 @@ public class AvroSinkMapperTestCase {
 
     @Test(description = "Check Avro sink maps siddhi events to avro message by retrieving the schema " +
             "from schema registry.")
-    public void avroSourceMapperTest9() throws InterruptedException {
+    public void avroSinkMapperTest9() throws InterruptedException {
         log.info("Testing Avro Sink Mapper with schema registry");
         String streams = "" +
                 "@App:name('TestApp')" +

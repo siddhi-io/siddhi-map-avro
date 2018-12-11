@@ -56,11 +56,27 @@
         </dependency>
         <dependency>
             <groupId>io.github.openfeign</groupId>
-            <artifactId>feign-okhttp</artifactId>
+            <artifactId>feign-core</artifactId>
         </dependency>
         <dependency>
             <groupId>io.github.openfeign</groupId>
             <artifactId>feign-gson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-okhttp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-slf4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okio</groupId>
+            <artifactId>okio</artifactId>
         </dependency>
         <!--Testing purposes-->
         <dependency>
@@ -149,6 +165,7 @@
                         <Private-Package>
                             com.fasterxml.jackson.core.*,
                             com.jayway.jsonpath.*,
+                            org.apache.tapestry5.json.*,
                             net.minidev.*,
                             org.objectweb.asm.*,
                             com.google.gson.*,
@@ -165,23 +182,36 @@
                             org.wso2.extension.siddhi.map.avro.*
                         </Export-Package>
                         <Import-Package>
-                            com.fasterxml.jackson.databind.*,
-                            javax.annotation.*,
-                            javax.xml.*,
-                            org.apache.log4j.*,
-                            org.apache.tapestry5.json.*,
-                            org.wso2.siddhi.annotation.*,
-                            org.wso2.siddhi.core.config.*,
-                            org.wso2.siddhi.core.event.*,
-                            org.wso2.siddhi.core.exception.*,
-                            org.wso2.siddhi.core.stream..*,
-                            org.wso2.siddhi.core.util.*,
-                            org.wso2.siddhi.query.api.definition.*,
-                            org.json.*,
-                            org.slf4j.*,
-                            org.w3c.*,
-                            org.xml.sax.*,
-                            sun.misc.*,
+                            com.fasterxml.jackson.databind;resolution:=optional;vers
+                            ion="[2.7,3)",com.fasterxml.jackson.databind.node;resolution:=optional;
+                            version="[2.7,3)",com.fasterxml.jackson.databind.type;resolution:=optio
+                            nal;version="[2.7,3)",feign;resolution:=optional;version="[9.5,10)",fei
+                            gn.codec;resolution:=optional;version="[9.5,10)",feign.gson;resolution:
+                            =optional;version="[9.5,10)",feign.okhttp;resolution:=optional;version=
+                            "[9.5,10)",javax.annotation;resolution:=optional,javax.inject;resolutio
+                            n:=optional,javax.xml.datatype;resolution:=optional,javax.xml.namespace
+                            ;resolution:=optional,javax.xml.parsers;resolution:=optional,org.apache
+                            .commons.compress.archivers;resolution:=optional;version="[1.8,2)",org.
+                            apache.log4j;resolution:=optional;version="[1.2,2)",org.apache.tapestry
+                            5.json;resolution:=optional,org.joda.time;resolution:=optional,org.joda
+                            .time.format;resolution:=optional,org.json;resolution:=optional,org.osg
+                            i.framework;resolution:=optional;version="[1.8,2)",org.slf4j;resolution
+                            :=optional;version="[1.7,2)",org.tukaani.xz;resolution:=optional,org.w3
+                            c.dom;resolution:=optional,org.w3c.dom.bootstrap;resolution:=optional,o
+                            rg.w3c.dom.ls;resolution:=optional,org.wso2.siddhi.annotation;resolutio
+                            n:=optional;version="[4.2,5)",org.wso2.siddhi.annotation.util;resolutio
+                            n:=optional;version="[4.2,5)",org.wso2.siddhi.core.config;resolution:=o
+                            ptional;version="[4.2,5)",org.wso2.siddhi.core.event;resolution:=option
+                            al;version="[4.2,5)",org.wso2.siddhi.core.exception;resolution:=optiona
+                            l;version="[4.2,5)",org.wso2.siddhi.core.stream.input.source;resolution
+                            :=optional;version="[4.2,5)",org.wso2.siddhi.core.stream.output.sink;re
+                            solution:=optional;version="[4.2,5)",org.wso2.siddhi.core.util;resoluti
+                            on:=optional;version="[4.2,5)",org.wso2.siddhi.core.util.config;resolut
+                            ion:=optional;version="[4.2,5)",org.wso2.siddhi.core.util.transport;res
+                            olution:=optional;version="[4.2,5)",org.wso2.siddhi.query.api.definitio
+                            n;resolution:=optional;version="[4.2,5)",org.xml.sax;resolution:=option
+                            al,sun.misc;resolution:=optional
+                            <!--*;resolution:=optional-->
                         </Import-Package>
                         <Include-Resource>
                             META-INF=target/classes/META-INF

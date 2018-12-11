@@ -94,13 +94,33 @@
             </dependency>
             <dependency>
                 <groupId>io.github.openfeign</groupId>
+                <artifactId>feign-gson</artifactId>
+                <version>${feign.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.openfeign</groupId>
+                <artifactId>feign-core</artifactId>
+                <version>${feign.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.openfeign</groupId>
                 <artifactId>feign-okhttp</artifactId>
                 <version>${feign.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.openfeign</groupId>
-                <artifactId>feign-gson</artifactId>
+                <artifactId>feign-slf4j</artifactId>
                 <version>${feign.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>3.12.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okio</groupId>
+                <artifactId>okio</artifactId>
+                <version>2.1.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -153,7 +173,7 @@
         <net.minidev.version>2.2</net.minidev.version>
         <jacoco.version>0.7.9</jacoco.version>
         <avro.version>1.8.2</avro.version>
-        <feign.version>9.3.1</feign.version>
+        <feign.version>9.5.0</feign.version>
         <!--Testing purposes-->
         <kafka_2.11.version>0.10.0.0</kafka_2.11.version>
         <siddhi-io-kafka>4.1.17</siddhi-io-kafka>
