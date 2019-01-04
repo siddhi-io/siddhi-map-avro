@@ -2,57 +2,62 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
      <loc>https://wso2-extensions.github.io/siddhi-map-avro/</loc>
-     <lastmod>2018-12-09</lastmod>
+     <lastmod>2019-01-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    <url>
+     <loc>https://wso2-extensions.github.io/siddhi-map-avro/api/1.0.8/</loc>
+     <lastmod>2019-01-04</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>https://wso2-extensions.github.io/siddhi-map-avro/api/1.0.7/</loc>
-     <lastmod>2018-12-09</lastmod>
+     <lastmod>2019-01-04</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>https://wso2-extensions.github.io/siddhi-map-avro/api/1.0.6/</loc>
-     <lastmod>2018-12-09</lastmod>
+     <lastmod>2019-01-04</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>https://wso2-extensions.github.io/siddhi-map-avro/api/1.0.5/</loc>
-     <lastmod>2018-12-09</lastmod>
+     <lastmod>2019-01-04</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>https://wso2-extensions.github.io/siddhi-map-avro/api/1.0.4/</loc>
-     <lastmod>2018-12-09</lastmod>
+     <lastmod>2019-01-04</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>https://wso2-extensions.github.io/siddhi-map-avro/api/1.0.3/</loc>
-     <lastmod>2018-12-09</lastmod>
+     <lastmod>2019-01-04</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>https://wso2-extensions.github.io/siddhi-map-avro/api/1.0.2/</loc>
-     <lastmod>2018-12-09</lastmod>
+     <lastmod>2019-01-04</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>https://wso2-extensions.github.io/siddhi-map-avro/api/1.0.1/</loc>
-     <lastmod>2018-12-09</lastmod>
+     <lastmod>2019-01-04</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>https://wso2-extensions.github.io/siddhi-map-avro/api/1.0.0/</loc>
-     <lastmod>2018-12-09</lastmod>
+     <lastmod>2019-01-04</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>https://wso2-extensions.github.io/siddhi-map-avro/api/latest/</loc>
-     <lastmod>2018-12-09</lastmod>
+     <lastmod>2019-01-04</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>https://wso2-extensions.github.io/siddhi-map-avro/license/</loc>
-     <lastmod>2018-12-09</lastmod>
+     <lastmod>2019-01-04</lastmod>
      <changefreq>daily</changefreq>
     </url>
 </urlset>
