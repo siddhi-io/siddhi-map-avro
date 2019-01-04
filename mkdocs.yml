@@ -28,6 +28,7 @@ extra:
 pages:
 - Welcome: index.md
 - API Docs:
+  - 1.0.40: api/1.0.40.md
   - 1.0.39: api/1.0.39.md
   - 1.0.38: api/1.0.38.md
   - 1.0.37: api/1.0.37.md
