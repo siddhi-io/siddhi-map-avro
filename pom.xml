@@ -174,8 +174,8 @@
         <jacoco.version>0.7.9</jacoco.version>
         <avro.version>1.8.2</avro.version>
         <feign.version>9.5.0</feign.version>
-        <okhttp.version>3.12.0</okhttp.version>
-        <okio.version>2.1.0</okio.version>
+        <okhttp.version>3.6.0</okhttp.version>
+        <okio.version>1.11.0</okio.version>
         <!--Testing purposes-->
         <kafka_2.11.version>0.10.0.0</kafka_2.11.version>
         <siddhi-io-kafka>4.1.17</siddhi-io-kafka>
@@ -184,8 +184,8 @@
         <curator-test.version>2.7.1</curator-test.version>
         <testng.version>6.8</testng.version>
 
-        <com.fasterxml.jackson.databind.range>[2.7, 3)</com.fasterxml.jackson.databind.range>
-        <feign.version.range>[9.5, 10)</feign.version.range>
+        <com.fasterxml.jackson.databind.range>[2.9, 3)</com.fasterxml.jackson.databind.range>
+        <feign.version.range>[9.3, 10)</feign.version.range>
         <org.wso2.siddhi.version.range>[4.2, 5)</org.wso2.siddhi.version.range>
         <org.slf4j.version.range>[1.7,2)</org.slf4j.version.range>
         <org.osgi.framework.version.range>[1.8,2)</org.osgi.framework.version.range>

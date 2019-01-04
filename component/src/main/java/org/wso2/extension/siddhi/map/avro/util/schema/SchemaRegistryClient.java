@@ -17,7 +17,8 @@
  */
 package org.wso2.extension.siddhi.map.avro.util.schema;
 
-import com.google.gson.JsonObject;
+import com.google.gson.internal.LinkedTreeMap;
+import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
 
@@ -28,8 +29,7 @@ public interface SchemaRegistryClient {
     @RequestLine("GET")
     Object connect();
 
-    @RequestLine("GET /{id}")
-    JsonObject findByID(@Param("id") String id);
-
-
+    @RequestLine("GET /schemas/ids/{id}")
+    @Headers("Content-Type: application/json")
+    LinkedTreeMap findByID(@Param("id") String id);
 }

@@ -17,8 +17,6 @@
  */
 package org.wso2.extension.siddhi.map.avro.util.schema;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.google.gson.internal.LinkedTreeMap;
 import feign.Feign;
 import feign.FeignException;
@@ -32,17 +30,14 @@ import org.apache.avro.SchemaParseException;
  * Class to connect to Schema Registry and retrive schema using the schema id.
  */
 public class SchemaRegistryReader {
-    private static final String URI = "/schemas/ids/";
-    private Gson gson = new Gson();
-
     public Schema getSchemaFromID(String registryURL, String schemaID) throws SchemaParseException, FeignException {
         SchemaRegistryClient registryClient = Feign.builder()
                 .client(new OkHttpClient())
                 .encoder(new GsonEncoder())
                 .decoder(new GsonDecoder())
-                .target(SchemaRegistryClient.class, registryURL + URI);
-        JsonObject returnedSchema = registryClient.findByID(schemaID);
-        Object json = gson.fromJson(returnedSchema, Object.class);
-        return  new Schema.Parser().parse((((LinkedTreeMap) json).get("schema")).toString());
+                .target(SchemaRegistryClient.class, registryURL);
+        LinkedTreeMap returnedSchema = registryClient.findByID(schemaID);
+        String jsonSchema = returnedSchema.get("schema").toString();
+        return new Schema.Parser().parse(jsonSchema);
     }
 }
