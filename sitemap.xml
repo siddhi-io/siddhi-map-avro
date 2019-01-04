@@ -6,6 +6,11 @@
      <changefreq>daily</changefreq>
     </url>
     <url>
+     <loc>https://wso2-extensions.github.io/siddhi-map-avro/api/1.0.58/</loc>
+     <lastmod>2019-01-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    <url>
      <loc>https://wso2-extensions.github.io/siddhi-map-avro/api/1.0.57/</loc>
      <lastmod>2019-01-04</lastmod>
      <changefreq>daily</changefreq>
