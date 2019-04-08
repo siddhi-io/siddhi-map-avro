@@ -18,6 +18,14 @@
 package org.wso2.extension.siddhi.map.avro.sourcemapper;
 
 import feign.FeignException;
+import io.siddhi.core.SiddhiAppRuntime;
+import io.siddhi.core.SiddhiManager;
+import io.siddhi.core.event.Event;
+import io.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.core.stream.output.StreamCallback;
+import io.siddhi.core.util.EventPrinter;
+import io.siddhi.core.util.transport.InMemoryBroker;
+import io.siddhi.core.util.transport.SubscriberUnAvailableException;
 import org.I0Itec.zkclient.exception.ZkTimeoutException;
 import org.apache.log4j.Appender;
 import org.apache.log4j.Layout;
@@ -31,13 +39,6 @@ import org.wso2.extension.siddhi.map.avro.AvroSchemaDefinitions;
 import org.wso2.extension.siddhi.map.avro.ConnectionTestUtil;
 import org.wso2.extension.siddhi.map.avro.util.AvroMessageProcessor;
 import org.wso2.extension.siddhi.map.avro.util.schema.RecordSchema;
-import org.wso2.siddhi.core.SiddhiAppRuntime;
-import org.wso2.siddhi.core.SiddhiManager;
-import org.wso2.siddhi.core.event.Event;
-import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
-import org.wso2.siddhi.core.stream.output.StreamCallback;
-import org.wso2.siddhi.core.util.EventPrinter;
-import org.wso2.siddhi.core.util.transport.InMemoryBroker;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
@@ -58,7 +59,7 @@ public class AvroSourceMapperTestCase {
     }
 
     @Test(description = "Check Avro source maps avro messages to siddhi events with a flat schema")
-    public void avroSourceMapperTest1() {
+    public void avroSourceMapperTest1() throws SubscriberUnAvailableException {
         log.info("Testing Avro Source Mapper with flat schema structure");
         String streams = "" +
                 "@App:name('TestApp')" +
@@ -103,7 +104,7 @@ public class AvroSourceMapperTestCase {
 
     @Test(description = "Check Avro source mapper maps avro messages to siddhi events with default " +
             "mapping for complex schema")
-    public void avroSourceMapperTest2() {
+    public void avroSourceMapperTest2() throws SubscriberUnAvailableException {
         log.info("Testing Avro Source Mapper with complex schema structure");
         String streams = "" +
                 "@App:name('TestApp')" +
@@ -160,7 +161,7 @@ public class AvroSourceMapperTestCase {
 
     @Test(description = "Check Avro source maps avro message with array schema to multiple events" +
             "with default mapping")
-    public void avroSourceMapperTest3() {
+    public void avroSourceMapperTest3() throws SubscriberUnAvailableException {
         log.info("Testing Avro Source Mapper with multiple events");
         String streams = "" +
                 "@App:name('TestApp')" +
@@ -259,7 +260,7 @@ public class AvroSourceMapperTestCase {
 
     @Test(description = "Check Avro source drops an avro message that is incompatible with " +
             "specified avro schema ")
-    public void avroSourceMapperTest5() {
+    public void avroSourceMapperTest5() throws SubscriberUnAvailableException {
         log.info("Testing Avro Source Mapper for incompatible avro message with avro schema");
         String streams = "" +
                 "@App:name('TestApp')" +
@@ -307,7 +308,7 @@ public class AvroSourceMapperTestCase {
 
     @Test(description = "Check if Avro source generates avro schema from stream attributes and " +
             "convert avro messages to siddhi events")
-    public void avroSourceMapperTest6() {
+    public void avroSourceMapperTest6() throws SubscriberUnAvailableException {
         log.info("Testing Avro Source Mapper with schema generation");
         String streams = "" +
                 "@App:name('TestApp')" +
@@ -369,7 +370,7 @@ public class AvroSourceMapperTestCase {
 
     @Test(description = "Check Avro source mapper for custom avro message mapping to siddhi events" +
             " with a complex schema")
-    public void avroSourceMapperTest8() {
+    public void avroSourceMapperTest8() throws SubscriberUnAvailableException {
         log.info("Testing Avro Source Mapper with custom mapping");
         String streams = "" +
                 "@App:name('TestApp')" +
@@ -419,7 +420,7 @@ public class AvroSourceMapperTestCase {
 
     @Test(description = "Check Avro source mapper for custom avro message mapping to siddhi events" +
             "with data type OBJECT.")
-    public void avroSourceMapperTest9() {
+    public void avroSourceMapperTest9() throws SubscriberUnAvailableException {
         log.info("Testing Avro Source Mapper with complex schema structure");
         String streams = "" +
                 "@App:name('TestApp')" +
@@ -469,7 +470,7 @@ public class AvroSourceMapperTestCase {
 
     @Test(description = "Check Avro source maps avro message with array schema to multiple events" +
             "with custom mapping")
-    public void avroSourceMapperTest10() {
+    public void avroSourceMapperTest10() throws SubscriberUnAvailableException {
         log.info("Testing Avro Source Mapper with multiple events");
         String streams = "" +
                 "@App:name('TestApp')" +
@@ -508,7 +509,7 @@ public class AvroSourceMapperTestCase {
 
     @Test(description = "Check Avro source maps avro message to siddhi events by retrieving the schema " +
             "from schema registry.")
-    public void avroSourceMapperTest11() {
+    public void avroSourceMapperTest11() throws SubscriberUnAvailableException {
         log.info("Testing Avro Source Mapper with schema registry");
         String streams = "" +
                 "@App:name('TestApp')" +

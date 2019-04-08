@@ -18,6 +18,14 @@
 package org.wso2.extension.siddhi.map.avro.sinkmapper;
 
 import feign.FeignException;
+import io.siddhi.core.SiddhiAppRuntime;
+import io.siddhi.core.SiddhiManager;
+import io.siddhi.core.event.Event;
+import io.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.core.stream.input.InputHandler;
+import io.siddhi.core.stream.output.StreamCallback;
+import io.siddhi.core.util.EventPrinter;
+import io.siddhi.core.util.transport.InMemoryBroker;
 import org.apache.avro.SchemaParseException;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.log4j.Appender;
@@ -32,14 +40,6 @@ import org.wso2.extension.siddhi.map.avro.AvroSchemaDefinitions;
 import org.wso2.extension.siddhi.map.avro.ConnectionTestUtil;
 import org.wso2.extension.siddhi.map.avro.util.AvroMessageProcessor;
 import org.wso2.extension.siddhi.map.avro.util.schema.RecordSchema;
-import org.wso2.siddhi.core.SiddhiAppRuntime;
-import org.wso2.siddhi.core.SiddhiManager;
-import org.wso2.siddhi.core.event.Event;
-import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
-import org.wso2.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.core.stream.output.StreamCallback;
-import org.wso2.siddhi.core.util.EventPrinter;
-import org.wso2.siddhi.core.util.transport.InMemoryBroker;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
