@@ -18,10 +18,10 @@
 package org.wso2.extension.siddhi.map.avro.util.schema;
 
 import com.google.gson.Gson;
+import io.siddhi.query.api.definition.Attribute;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaParseException;
 import org.apache.log4j.Logger;
-import org.wso2.siddhi.query.api.definition.Attribute;
 
 import java.util.ArrayList;
 import java.util.HashMap;

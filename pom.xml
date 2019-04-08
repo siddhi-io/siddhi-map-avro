@@ -37,17 +37,17 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.wso2.siddhi</groupId>
+                <groupId>io.siddhi</groupId>
                 <artifactId>siddhi-core</artifactId>
                 <version>${siddhi.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.siddhi</groupId>
+                <groupId>io.siddhi</groupId>
                 <artifactId>siddhi-query-api</artifactId>
                 <version>${siddhi.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.siddhi</groupId>
+                <groupId>io.siddhi</groupId>
                 <artifactId>siddhi-annotations</artifactId>
                 <version>${siddhi.version}</version>
             </dependency>
@@ -163,7 +163,7 @@
         </plugins>
     </build>
     <properties>
-        <siddhi.version>4.2.17</siddhi.version>
+        <siddhi.version>5.0.0-m7</siddhi.version>
         <log4j.version>1.2.17.wso2v1</log4j.version>
         <carbon.feature.plugin.version>3.0.0</carbon.feature.plugin.version>
         <jackson.version>2.7.4</jackson.version>
@@ -186,7 +186,7 @@
 
         <com.fasterxml.jackson.databind.range>[2.9, 3)</com.fasterxml.jackson.databind.range>
         <feign.version.range>[9.3, 10)</feign.version.range>
-        <org.wso2.siddhi.version.range>[4.2, 5)</org.wso2.siddhi.version.range>
+        <io.siddhi.version.range>[5.0.0, 6.0.0)</io.siddhi.version.range>
         <org.slf4j.version.range>[1.7,2)</org.slf4j.version.range>
         <org.osgi.framework.version.range>[1.8,2)</org.osgi.framework.version.range>
         <org.apache.log4j.version.range>[1.2,2)</org.apache.log4j.version.range>

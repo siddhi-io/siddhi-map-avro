@@ -29,6 +29,22 @@ import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
 import com.jayway.jsonpath.ReadContext;
 import feign.FeignException;
+import io.siddhi.annotation.Example;
+import io.siddhi.annotation.Extension;
+import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.util.DataType;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.event.Event;
+import io.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.core.exception.SiddhiAppRuntimeException;
+import io.siddhi.core.stream.input.source.AttributeMapping;
+import io.siddhi.core.stream.input.source.InputEventHandler;
+import io.siddhi.core.stream.input.source.SourceMapper;
+import io.siddhi.core.util.AttributeConverter;
+import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.transport.OptionHolder;
+import io.siddhi.query.api.definition.Attribute;
+import io.siddhi.query.api.definition.StreamDefinition;
 import net.minidev.json.JSONArray;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaParseException;
@@ -36,22 +52,6 @@ import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.map.avro.util.AvroMessageProcessor;
 import org.wso2.extension.siddhi.map.avro.util.schema.RecordSchema;
 import org.wso2.extension.siddhi.map.avro.util.schema.SchemaRegistryReader;
-import org.wso2.siddhi.annotation.Example;
-import org.wso2.siddhi.annotation.Extension;
-import org.wso2.siddhi.annotation.Parameter;
-import org.wso2.siddhi.annotation.util.DataType;
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.event.Event;
-import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
-import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
-import org.wso2.siddhi.core.stream.input.source.AttributeMapping;
-import org.wso2.siddhi.core.stream.input.source.InputEventHandler;
-import org.wso2.siddhi.core.stream.input.source.SourceMapper;
-import org.wso2.siddhi.core.util.AttributeConverter;
-import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.siddhi.core.util.transport.OptionHolder;
-import org.wso2.siddhi.query.api.definition.Attribute;
-import org.wso2.siddhi.query.api.definition.StreamDefinition;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -60,7 +60,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * This mapper converts Avro message stream input to {@link org.wso2.siddhi.core.event.ComplexEventChunk}.
+ * This mapper converts Avro message stream input to {@link io.siddhi.core.event.ComplexEventChunk}.
  */
 
 @Extension(
@@ -223,7 +223,7 @@ public class AvroSourceMapper extends SourceMapper {
 
     /**
      * Receives an event or events as a byte[] from source, converts it to
-     * a {@link org.wso2.siddhi.core.event.ComplexEventChunk}.
+     * a {@link io.siddhi.core.event.ComplexEventChunk}.
      *
      * @param eventObject       the input, given as a byte array or ByteBuffer
      * @param inputEventHandler input handler
