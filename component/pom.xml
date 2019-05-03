@@ -185,7 +185,7 @@
                             org.tukaani.xz,
                         </Private-Package>
                         <Export-Package>
-                            org.wso2.extension.siddhi.map.avro.*
+                            io.siddhi.extension.map.avro.*
                         </Export-Package>
                         <Import-Package>
                             com.fasterxml.jackson.databind.*;version="${com.fasterxml.jackson.databind.range}",

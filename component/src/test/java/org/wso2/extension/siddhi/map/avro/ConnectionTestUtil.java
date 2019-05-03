@@ -15,13 +15,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.extension.siddhi.map.avro;
+package io.siddhi.extension.map.avro;
 
 import feign.Feign;
 import feign.FeignException;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
 import feign.okhttp.OkHttpClient;
+import io.siddhi.extension.map.avro.util.schema.SchemaRegistryClient;
 import kafka.admin.AdminUtils;
 import kafka.admin.RackAwareMode;
 import kafka.common.TopicExistsException;
@@ -40,7 +41,6 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.log4j.Logger;
-import org.wso2.extension.siddhi.map.avro.util.schema.SchemaRegistryClient;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

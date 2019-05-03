@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.extension.siddhi.map.avro.sinkmapper;
+package io.siddhi.extension.map.avro.sinkmapper;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -32,14 +32,14 @@ import io.siddhi.core.stream.output.sink.SinkMapper;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.core.util.transport.TemplateBuilder;
+import io.siddhi.extension.map.avro.util.AvroMessageProcessor;
+import io.siddhi.extension.map.avro.util.schema.RecordSchema;
+import io.siddhi.extension.map.avro.util.schema.SchemaRegistryReader;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.StreamDefinition;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaParseException;
 import org.apache.log4j.Logger;
-import org.wso2.extension.siddhi.map.avro.util.AvroMessageProcessor;
-import org.wso2.extension.siddhi.map.avro.util.schema.RecordSchema;
-import org.wso2.extension.siddhi.map.avro.util.schema.SchemaRegistryReader;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;

@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.extension.siddhi.map.avro.util.schema;
+package io.siddhi.extension.map.avro.util.schema;
 
 import com.google.gson.internal.LinkedTreeMap;
 import feign.Feign;

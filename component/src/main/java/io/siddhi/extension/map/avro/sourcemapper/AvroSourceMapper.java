@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.extension.siddhi.map.avro.sourcemapper;
+package io.siddhi.extension.map.avro.sourcemapper;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
@@ -43,15 +43,15 @@ import io.siddhi.core.stream.input.source.SourceMapper;
 import io.siddhi.core.util.AttributeConverter;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.transport.OptionHolder;
+import io.siddhi.extension.map.avro.util.AvroMessageProcessor;
+import io.siddhi.extension.map.avro.util.schema.RecordSchema;
+import io.siddhi.extension.map.avro.util.schema.SchemaRegistryReader;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.StreamDefinition;
 import net.minidev.json.JSONArray;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaParseException;
 import org.apache.log4j.Logger;
-import org.wso2.extension.siddhi.map.avro.util.AvroMessageProcessor;
-import org.wso2.extension.siddhi.map.avro.util.schema.RecordSchema;
-import org.wso2.extension.siddhi.map.avro.util.schema.SchemaRegistryReader;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.extension.siddhi.map.avro.sourcemapper;
+package io.siddhi.extension.map.avro.sourcemapper;
 
 import feign.FeignException;
 import io.siddhi.core.SiddhiAppRuntime;
@@ -26,6 +26,10 @@ import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.transport.InMemoryBroker;
 import io.siddhi.core.util.transport.SubscriberUnAvailableException;
+import io.siddhi.extension.map.avro.AvroSchemaDefinitions;
+import io.siddhi.extension.map.avro.ConnectionTestUtil;
+import io.siddhi.extension.map.avro.util.AvroMessageProcessor;
+import io.siddhi.extension.map.avro.util.schema.RecordSchema;
 import org.I0Itec.zkclient.exception.ZkTimeoutException;
 import org.apache.log4j.Appender;
 import org.apache.log4j.Layout;
@@ -35,10 +39,6 @@ import org.apache.log4j.WriterAppender;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.wso2.extension.siddhi.map.avro.AvroSchemaDefinitions;
-import org.wso2.extension.siddhi.map.avro.ConnectionTestUtil;
-import org.wso2.extension.siddhi.map.avro.util.AvroMessageProcessor;
-import org.wso2.extension.siddhi.map.avro.util.schema.RecordSchema;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
