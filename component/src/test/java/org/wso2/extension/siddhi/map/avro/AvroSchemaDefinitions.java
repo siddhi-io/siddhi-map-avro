@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.extension.siddhi.map.avro;
+package io.siddhi.extension.map.avro;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericArray;

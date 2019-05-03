@@ -22,8 +22,8 @@
 <suite name="Avro-Map-Test-Suite">
     <test name="avro-map-tests" enabled="true" preserve-order="true">
         <classes>
-            <class name="org.wso2.extension.siddhi.map.avro.sourcemapper.AvroSourceMapperTestCase"/>
-            <class name="org.wso2.extension.siddhi.map.avro.sinkmapper.AvroSinkMapperTestCase"/>
+            <class name="io.siddhi.extension.map.avro.sourcemapper.AvroSourceMapperTestCase"/>
+            <class name="io.siddhi.extension.map.avro.sinkmapper.AvroSinkMapperTestCase"/>
         </classes>
     </test>
 </suite>
