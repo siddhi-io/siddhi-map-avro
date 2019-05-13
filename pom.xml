@@ -27,7 +27,7 @@
 
     <groupId>org.wso2.extension.siddhi.map.avro</groupId>
     <artifactId>siddhi-map-avro-parent</artifactId>
-    <version>1.0.67</version>
+    <version>1.0.68-SNAPSHOT</version>
     <name>Siddhi Avro Map Extensions</name>
 
     <modules>
@@ -200,7 +200,7 @@
         <url>https://github.com/wso2-extensions/siddhi-map-avro.git</url>
         <developerConnection>scm:git:https://github.com/wso2-extensions/siddhi-map-avro.git</developerConnection>
         <connection>scm:git:https://github.com/wso2-extensions/siddhi-map-avro.git</connection>
-        <tag>v1.0.67</tag>
+        <tag>HEAD</tag>
     </scm>
 </project>
 
