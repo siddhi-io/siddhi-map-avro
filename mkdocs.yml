@@ -1,102 +1,107 @@
 site_name: Siddhi Map Avro
-site_description: Siddhi Avro Extension
-site_author: WSO2
-site_url: https://wso2-extensions.github.io/siddhi-map-avro/
-extra_css:
-- stylesheets/extra.css
-extra_javascript:
-- javascripts/extra.js
-repo_name: Siddhi-Map-Avro
-repo_url: https://github.com/wso2-extensions/siddhi-map-avro
-copyright: Copyright &copy; 2011 - 2018 WSO2
+site_description: Siddhi Map Avro Extension
+repo_name: Siddhi Map Avro
+repo_url: https://github.com/siddhi-io/siddhi-map-avro/
+edit_uri: https://github.com/siddhi-io/siddhi-map-avro/blob/master/
+copyright: Siddhi - Documentation
 theme:
   name: material
-  logo: images/siddhi-logo-w.svg
+  logo: images/siddhi-logo.svg
   favicon: images/favicon.ico
   palette:
     primary: teal
     accent: teal
-google_analytics:
-- UA-103065-28
-- auto
+extra_css:
+  - assets/stylesheets/extra.css
+extra_javascript:
+  - assets/javascripts/extra.js
 extra:
   social:
-  - type: github
-    link: https://github.com/wso2/siddhi
-  - type: linkedin
-    link: https://www.linkedin.com/groups/13553064
+    - type: github
+      link: https://github.com/siddhi-io/siddhi
+    - type: medium
+      link: https://medium.com/siddhi-io
+    - type: twitter
+      link: https://twitter.com/siddhi_io
+    - type: linkedin
+      link: https://www.linkedin.com/groups/13553064
+google_analytics:
+  - UA-103065-28
+  - auto
+markdown_extensions:
+  - markdown.extensions.admonition
 pages:
-- Welcome: index.md
-- API Docs:
-  - 2.0.2: api/2.0.2.md
-  - 2.0.1: api/2.0.1.md
-  - 2.0.0: api/2.0.0.md
-  - 1.0.66: api/1.0.66.md
-  - 1.0.65: api/1.0.65.md
-  - 1.0.64: api/1.0.64.md
-  - 1.0.63: api/1.0.63.md
-  - 1.0.62: api/1.0.62.md
-  - 1.0.61: api/1.0.61.md
-  - 1.0.60: api/1.0.60.md
-  - 1.0.59: api/1.0.59.md
-  - 1.0.58: api/1.0.58.md
-  - 1.0.57: api/1.0.57.md
-  - 1.0.56: api/1.0.56.md
-  - 1.0.55: api/1.0.55.md
-  - 1.0.54: api/1.0.54.md
-  - 1.0.53: api/1.0.53.md
-  - 1.0.52: api/1.0.52.md
-  - 1.0.51: api/1.0.51.md
-  - 1.0.50: api/1.0.50.md
-  - 1.0.49: api/1.0.49.md
-  - 1.0.48: api/1.0.48.md
-  - 1.0.47: api/1.0.47.md
-  - 1.0.46: api/1.0.46.md
-  - 1.0.45: api/1.0.45.md
-  - 1.0.44: api/1.0.44.md
-  - 1.0.43: api/1.0.43.md
-  - 1.0.42: api/1.0.42.md
-  - 1.0.41: api/1.0.41.md
-  - 1.0.40: api/1.0.40.md
-  - 1.0.39: api/1.0.39.md
-  - 1.0.38: api/1.0.38.md
-  - 1.0.37: api/1.0.37.md
-  - 1.0.36: api/1.0.36.md
-  - 1.0.35: api/1.0.35.md
-  - 1.0.34: api/1.0.34.md
-  - 1.0.33: api/1.0.33.md
-  - 1.0.32: api/1.0.32.md
-  - 1.0.31: api/1.0.31.md
-  - 1.0.30: api/1.0.30.md
-  - 1.0.29: api/1.0.29.md
-  - 1.0.28: api/1.0.28.md
-  - 1.0.27: api/1.0.27.md
-  - 1.0.26: api/1.0.26.md
-  - 1.0.25: api/1.0.25.md
-  - 1.0.24: api/1.0.24.md
-  - 1.0.23: api/1.0.23.md
-  - 1.0.22: api/1.0.22.md
-  - 1.0.21: api/1.0.21.md
-  - 1.0.20: api/1.0.20.md
-  - 1.0.19: api/1.0.19.md
-  - 1.0.18: api/1.0.18.md
-  - 1.0.17: api/1.0.17.md
-  - 1.0.16: api/1.0.16.md
-  - 1.0.15: api/1.0.15.md
-  - 1.0.14: api/1.0.14.md
-  - 1.0.13: api/1.0.13.md
-  - 1.0.12: api/1.0.12.md
-  - 1.0.11: api/1.0.11.md
-  - 1.0.10: api/1.0.10.md
-  - 1.0.9: api/1.0.9.md
-  - 1.0.8: api/1.0.8.md
-  - 1.0.7: api/1.0.7.md
-  - 1.0.6: api/1.0.6.md
-  - 1.0.5: api/1.0.5.md
-  - 1.0.4: api/1.0.4.md
-  - 1.0.3: api/1.0.3.md
-  - 1.0.2: api/1.0.2.md
-  - 1.0.1: api/1.0.1.md
-  - 1.0.0: api/1.0.0.md
-  - latest: api/latest.md
-- License: license.md
+  - Information: index.md
+  - API Docs:
+      - latest: api/latest.md
+      - 2.0.2: api/2.0.2.md
+      - 2.0.1: api/2.0.1.md
+      - 2.0.0: api/2.0.0.md
+      - 1.0.66: api/1.0.66.md
+      - 1.0.65: api/1.0.65.md
+      - 1.0.64: api/1.0.64.md
+      - 1.0.63: api/1.0.63.md
+      - 1.0.62: api/1.0.62.md
+      - 1.0.61: api/1.0.61.md
+      - 1.0.60: api/1.0.60.md
+      - 1.0.59: api/1.0.59.md
+      - 1.0.58: api/1.0.58.md
+      - 1.0.57: api/1.0.57.md
+      - 1.0.56: api/1.0.56.md
+      - 1.0.55: api/1.0.55.md
+      - 1.0.54: api/1.0.54.md
+      - 1.0.53: api/1.0.53.md
+      - 1.0.52: api/1.0.52.md
+      - 1.0.51: api/1.0.51.md
+      - 1.0.50: api/1.0.50.md
+      - 1.0.49: api/1.0.49.md
+      - 1.0.48: api/1.0.48.md
+      - 1.0.47: api/1.0.47.md
+      - 1.0.46: api/1.0.46.md
+      - 1.0.45: api/1.0.45.md
+      - 1.0.44: api/1.0.44.md
+      - 1.0.43: api/1.0.43.md
+      - 1.0.42: api/1.0.42.md
+      - 1.0.41: api/1.0.41.md
+      - 1.0.40: api/1.0.40.md
+      - 1.0.39: api/1.0.39.md
+      - 1.0.38: api/1.0.38.md
+      - 1.0.37: api/1.0.37.md
+      - 1.0.36: api/1.0.36.md
+      - 1.0.35: api/1.0.35.md
+      - 1.0.34: api/1.0.34.md
+      - 1.0.33: api/1.0.33.md
+      - 1.0.32: api/1.0.32.md
+      - 1.0.31: api/1.0.31.md
+      - 1.0.30: api/1.0.30.md
+      - 1.0.29: api/1.0.29.md
+      - 1.0.28: api/1.0.28.md
+      - 1.0.27: api/1.0.27.md
+      - 1.0.26: api/1.0.26.md
+      - 1.0.25: api/1.0.25.md
+      - 1.0.24: api/1.0.24.md
+      - 1.0.23: api/1.0.23.md
+      - 1.0.22: api/1.0.22.md
+      - 1.0.21: api/1.0.21.md
+      - 1.0.20: api/1.0.20.md
+      - 1.0.19: api/1.0.19.md
+      - 1.0.18: api/1.0.18.md
+      - 1.0.17: api/1.0.17.md
+      - 1.0.16: api/1.0.16.md
+      - 1.0.15: api/1.0.15.md
+      - 1.0.14: api/1.0.14.md
+      - 1.0.13: api/1.0.13.md
+      - 1.0.12: api/1.0.12.md
+      - 1.0.11: api/1.0.11.md
+      - 1.0.10: api/1.0.10.md
+      - 1.0.9: api/1.0.9.md
+      - 1.0.8: api/1.0.8.md
+      - 1.0.7: api/1.0.7.md
+      - 1.0.6: api/1.0.6.md
+      - 1.0.5: api/1.0.5.md
+      - 1.0.4: api/1.0.4.md
+      - 1.0.3: api/1.0.3.md
+      - 1.0.2: api/1.0.2.md
+      - 1.0.1: api/1.0.1.md
+      - 1.0.0: api/1.0.0.md
+  - License: license.md
