@@ -81,7 +81,7 @@ import java.util.Map;
                         syntax = "@sink(type='inMemory', topic='stock', @map(type='avro'," +
                                 "schema.def = \"\"\"{\"type\":\"record\",\"name\":\"stock\"," +
                                 "\"namespace\":\"stock.example\",\"fields\":[{\"name\":\"symbol\"," +
-                                "\"type\":\"string\"},{\"name\":\"price\":\"type\":\"float\"}," +
+                                "\"type\":\"string\"},{\"name\":\"price\",\"type\":\"float\"}," +
                                 "{\"name\":\"volume\",\"type\":\"long\"}]}\"\"\"))\n" +
                                 "define stream StockStream (symbol string, price float, volume long);",
                         description = "The above configuration performs a default Avro mapping that generates " +
