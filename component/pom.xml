@@ -178,7 +178,7 @@
                             org.joda.time.*,
                             org.xerial.snappy.*,
                             org.apache.commons.compress.archivers.*,
-                            feign.okhttp.*,
+                            feign.*,
                             okhttp3.*,
                             okio.*,
                             javax.inject,
@@ -189,7 +189,6 @@
                         </Export-Package>
                         <Import-Package>
                             com.fasterxml.jackson.databind.*;version="${com.fasterxml.jackson.databind.range}",
-                            feign;version="${feign.version.range}",
                             feign.codec;version="${feign.version.range}",
                             feign.gson;version="${feign.version.range}",
                             javax.annotation,
