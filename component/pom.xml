@@ -189,8 +189,6 @@
                         </Export-Package>
                         <Import-Package>
                             com.fasterxml.jackson.databind.*;version="${com.fasterxml.jackson.databind.range}",
-                            feign.codec;version="${feign.version.range}",
-                            feign.gson;version="${feign.version.range}",
                             javax.annotation,
                             javax.xml,
                             org.apache.log4j.*;version="${org.apache.log4j.version.range}",
