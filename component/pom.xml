@@ -163,7 +163,6 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
-                            com.fasterxml.jackson.core.*,
                             com.jayway.jsonpath.*,
                             org.apache.tapestry5.json.*,
                             net.minidev.*,
