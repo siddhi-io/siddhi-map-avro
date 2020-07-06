@@ -17,6 +17,7 @@
  */
 package io.siddhi.extension.map.avro.util;
 
+import io.siddhi.core.util.error.handler.model.ErroneousEvent;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericDatumWriter;
@@ -30,6 +31,7 @@ import org.apache.log4j.Logger;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * This class to contain methods to deserialize byte array to Avro Record and serialize
@@ -59,7 +61,7 @@ public class AvroMessageProcessor {
         }
     }
 
-    public static Object deserializeByteArray(byte[] data, Schema schema) {
+    public static Object deserializeByteArray(byte[] data, Schema schema, List<ErroneousEvent> failedEvents) {
         DatumReader<GenericRecord> reader = new GenericDatumReader<>(schema);
         Decoder decoder = DecoderFactory.get().binaryDecoder(data, null);
         try {
@@ -68,6 +70,9 @@ public class AvroMessageProcessor {
         } catch (IOException e) {
             log.error("Error occured when deserializing avro byte stream conforming " +
                     "to schema " + schema.toString() + ". Hence dropping the event.");
+            failedEvents.add(new ErroneousEvent(data,
+                    "Error occured when deserializing avro byte stream conforming " +
+                            "to schema " + schema.toString() + ". Hence dropping the event."));
             return null;
         }
     }

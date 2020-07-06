@@ -25,6 +25,7 @@ import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.core.util.EventPrinter;
+import io.siddhi.core.util.error.handler.model.ErroneousEvent;
 import io.siddhi.core.util.transport.InMemoryBroker;
 import io.siddhi.extension.map.avro.AvroSchemaDefinitions;
 import io.siddhi.extension.map.avro.ConnectionTestUtil;
@@ -43,7 +44,9 @@ import org.testng.annotations.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -87,8 +90,9 @@ public class AvroSinkMapperTestCase {
         InMemoryBroker.Subscriber subscriber = new InMemoryBroker.Subscriber() {
             @Override
             public void onMessage(Object o) {
+                List<ErroneousEvent> failedEvents = new ArrayList<>(0);
                 Object events = AvroMessageProcessor.deserializeByteArray(((ByteBuffer) o).array(),
-                        AvroSchemaDefinitions.getFlatSchema());
+                        AvroSchemaDefinitions.getFlatSchema(), failedEvents);
                 if (events != null) {
                     log.info(events);
                     eventArrived = true;
@@ -165,8 +169,9 @@ public class AvroSinkMapperTestCase {
         InMemoryBroker.Subscriber subscriber = new InMemoryBroker.Subscriber() {
             @Override
             public void onMessage(Object obj) {
+                List<ErroneousEvent> failedEvents = new ArrayList<>(0);
                 Object events = AvroMessageProcessor.deserializeByteArray(((ByteBuffer) obj).array(),
-                        AvroSchemaDefinitions.getComplexSchema());
+                        AvroSchemaDefinitions.getComplexSchema(), failedEvents);
                 if (events != null) {
                     log.info(events);
                     eventArrived = true;
@@ -344,9 +349,10 @@ public class AvroSinkMapperTestCase {
         InMemoryBroker.Subscriber subscriber = new InMemoryBroker.Subscriber() {
             @Override
             public void onMessage(Object obj) {
+                List<ErroneousEvent> failedEvents = new ArrayList<>(0);
                 if (obj instanceof ByteBuffer) {
                     Object message = AvroMessageProcessor.deserializeByteArray(((ByteBuffer) obj).array(),
-                            AvroSchemaDefinitions.getFlatSchema());
+                            AvroSchemaDefinitions.getFlatSchema(), failedEvents);
                     log.info(message);
                     eventArrived = true;
                     count.getAndIncrement();
@@ -435,8 +441,9 @@ public class AvroSinkMapperTestCase {
         InMemoryBroker.Subscriber subscriber = new InMemoryBroker.Subscriber() {
             @Override
             public void onMessage(Object obj) {
+                List<ErroneousEvent> failedEvents = new ArrayList<>(0);
                 Object event = AvroMessageProcessor.deserializeByteArray(((ByteBuffer) obj).array(),
-                        AvroSchemaDefinitions.getFlatAvroSchema());
+                        AvroSchemaDefinitions.getFlatAvroSchema(), failedEvents);
                 if (event != null) {
                     log.info(event);
                     eventArrived = true;
@@ -509,8 +516,9 @@ public class AvroSinkMapperTestCase {
             @Override
             public void onMessage(Object obj) {
                 if (obj instanceof ByteBuffer) {
+                    List<ErroneousEvent> failedEvents = new ArrayList<>(0);
                     Object message = AvroMessageProcessor.deserializeByteArray(((ByteBuffer) obj).array(),
-                            AvroSchemaDefinitions.getComplexSchema());
+                            AvroSchemaDefinitions.getComplexSchema(), failedEvents);
                     log.info(message);
                     eventArrived = true;
                     count.getAndIncrement();
