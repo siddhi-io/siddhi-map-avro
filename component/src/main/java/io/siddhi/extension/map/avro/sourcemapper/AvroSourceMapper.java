@@ -35,13 +35,14 @@ import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.Event;
+import io.siddhi.core.exception.MappingFailedException;
 import io.siddhi.core.exception.SiddhiAppCreationException;
-import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.stream.input.source.AttributeMapping;
 import io.siddhi.core.stream.input.source.InputEventHandler;
 import io.siddhi.core.stream.input.source.SourceMapper;
 import io.siddhi.core.util.AttributeConverter;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.error.handler.model.ErroneousEvent;
 import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.extension.map.avro.util.AvroMessageProcessor;
 import io.siddhi.extension.map.avro.util.schema.RecordSchema;
@@ -229,21 +230,29 @@ public class AvroSourceMapper extends SourceMapper {
      * @param inputEventHandler input handler
      */
     @Override
-    protected void mapAndProcess(Object eventObject, InputEventHandler inputEventHandler) throws InterruptedException {
+    protected void mapAndProcess(Object eventObject, InputEventHandler inputEventHandler)
+            throws InterruptedException, MappingFailedException {
         Event[] convertedEvent = null;
+        List<ErroneousEvent> failedEvents = new ArrayList<>(0);
         try {
-            convertedEvent = convertToEvents(eventObject);
+            convertedEvent = convertToEvents(eventObject, failedEvents);
         } catch (Throwable t) {
             log.error("Exception occurred when converting Avro message: " + eventObject.toString() +
                     " to Siddhi Event", t);
+            failedEvents.add(new ErroneousEvent(eventObject,
+                    "Exception occurred when converting Avro message: " + eventObject.toString() +
+                            " to Siddhi Event"));
         }
-
         if (convertedEvent != null) {
             inputEventHandler.sendEvents(convertedEvent);
         }
+        if (!failedEvents.isEmpty()) {
+            throw new MappingFailedException(failedEvents);
+        }
     }
 
-    private Event[] convertToEvents(Object eventObject) {
+    private Event[] convertToEvents(Object eventObject, List<ErroneousEvent> failedEvents)
+            throws MappingFailedException {
         byte[] binaryEvent;
         if (eventObject instanceof byte[]) {
             binaryEvent = (byte[]) eventObject;
@@ -252,16 +261,20 @@ public class AvroSourceMapper extends SourceMapper {
         } else {
             log.error("Event object is invalid. Expected byte Array or ByteBuffer, but found "
                     + eventObject.getClass().getCanonicalName());
+            failedEvents.add(new ErroneousEvent(eventObject,
+                    "Event object is invalid. Expected byte Array or ByteBuffer, but found "
+                            + eventObject.getClass().getCanonicalName()));
             return null;
         }
-
-
         Object jsonObj;
         try {
-            jsonObj = AvroMessageProcessor.deserializeByteArray(binaryEvent, schema);
+            jsonObj = AvroMessageProcessor.deserializeByteArray(binaryEvent, schema, failedEvents);
         } catch (Throwable t) {
             log.error("Error when converting avro message of schema: " + schema.toString() +
                     " to siddhi event. " + t.getMessage() + ". Hence dropping the event.");
+            failedEvents.add(new ErroneousEvent(eventObject, t,
+                    "Error when converting avro message of schema: " + schema.toString() +
+                            " to siddhi event. " + t.getMessage() + ". Hence dropping the event."));
             return null;
         }
 
@@ -269,6 +282,8 @@ public class AvroSourceMapper extends SourceMapper {
             String avroMessage = jsonObj.toString();
             if (!isJsonValid(avroMessage)) {
                 log.error("Invalid Avro message :" + avroMessage + " for schema " + schema.toString());
+                failedEvents.add(new ErroneousEvent(eventObject,
+                        "Invalid Avro message :" + avroMessage + " for schema " + schema.toString()));
             } else {
                 ReadContext readContext = JsonPath.parse(avroMessage);
                 Object avroObj = readContext.read(DEFAULT_JSON_PATH);
@@ -277,7 +292,7 @@ public class AvroSourceMapper extends SourceMapper {
                     if (isCustomMappingEnabled) {
                         return convertToEventArrayForCustomMapping(eventObjects);
                     } else {
-                        return convertToEventArrayForDefaultMapping(eventObjects);
+                        return convertToEventArrayForDefaultMapping(eventObjects, failedEvents, eventObject);
                     }
                 } else {
                     if (isCustomMappingEnabled) {
@@ -295,15 +310,17 @@ public class AvroSourceMapper extends SourceMapper {
      * The method returns a null instead of a byte[0] to enhance the performance.
      * Creation of empty byte array and length > 0 check for each event conversion is costly
      */
-    private Event[] convertToEventArrayForDefaultMapping(JsonObject[] eventObjects) {
+    private Event[] convertToEventArrayForDefaultMapping(JsonObject[] eventObjects, List<ErroneousEvent> failedEvents,
+                                                         Object eventObject) throws MappingFailedException {
         List<Event> eventList = new ArrayList<>();
         for (JsonObject jsonEvent : eventObjects) {
             if (jsonEvent.size() < streamAttributes.size()) {
-                log.error("Avro message " + jsonEvent.toString() + " is not in an accepted format for default " +
-                        "avro mapping. Number of attributes in avro message:" + jsonEvent.size() + " is less  " +
+                String errStr = "Avro message " + jsonEvent.toString() + " is not in an accepted format for default " +
+                        "Avro mapping. Number of attributes in avro message:" + jsonEvent.size() + " is less  " +
                         "than the number of attributes in stream " + streamDefinition.getId() + ":" +
-                        streamAttributes.size());
-                continue;
+                        streamAttributes.size();
+                log.error(errStr);
+                failedEvents.add(new ErroneousEvent(eventObject, errStr));
             } else {
                 Event[] event = convertToSingleEventForDefaultMapping(jsonEvent.toString());
                 if (event != null) {
@@ -318,7 +335,7 @@ public class AvroSourceMapper extends SourceMapper {
      * The method returns a null instead of a byte[0] to enhance the performance.
      * Creation of empty byte array and length > 0 check for each event conversion is costly
      */
-    private Event[] convertToSingleEventForDefaultMapping(String avroMessage) {
+    private Event[] convertToSingleEventForDefaultMapping(String avroMessage) throws MappingFailedException {
         List<Event> eventList = new ArrayList<>();
         Event event = new Event(streamAttributesSize);
         Object[] data = event.getData();
@@ -329,8 +346,10 @@ public class AvroSourceMapper extends SourceMapper {
         try {
             parser = jsonFactory.createParser(avroMessage);
         } catch (IOException e) {
-            throw new SiddhiAppRuntimeException("Initializing a parser failed for the event string."
-                    + avroMessage);
+            String errStr = "Initializing a parser failed for the event string."
+                    + avroMessage;
+            log.error(errStr);
+            throw new MappingFailedException(errStr, e);
         }
 
         while (!parser.isClosed()) {
@@ -343,11 +362,13 @@ public class AvroSourceMapper extends SourceMapper {
                     String key = parser.getCurrentName();
                     position = findDefaultMappingPosition(key);
                     if (position == -1) {
-                        log.error("Stream \"" + streamDefinition.getId() + "\" does not have an attribute " +
+                        String errStr = "Stream \"" + streamDefinition.getId() + "\" does not have an attribute " +
                                 "named \"" + key + "\", but the received event " + avroMessage + "does. " +
                                 "Hence dropping the message. Check whether the avro message is in a " +
-                                "orrect format for default mapping.");
-                        return null;
+                                "orrect format for default mapping."
+                                + avroMessage;
+                        log.error(errStr);
+                        throw new MappingFailedException(errStr);
                     }
                     jsonToken = parser.nextToken();
                     Attribute.Type type = streamAttributes.get(position).getType();
@@ -360,30 +381,33 @@ public class AvroSourceMapper extends SourceMapper {
                                 if (JsonToken.VALUE_TRUE.equals(jsonToken) || JsonToken.VALUE_FALSE.equals(jsonToken)) {
                                     data[position] = parser.getValueAsBoolean();
                                 } else {
-                                    log.error("Avro message " + avroMessage + "contains incompatible attribute types " +
-                                            "and values. Value " + parser.getText() + " is not compatible with type " +
-                                            "BOOL. Hence dropping the message.");
-                                    return null;
+                                    String errStr = "Avro message " + avroMessage + "contains incompatible attribute " +
+                                            "types and values. Value " + parser.getText() + " is not compatible with " +
+                                            "type BOOL. Hence dropping the message.";
+                                    log.error(errStr);
+                                    throw new MappingFailedException(errStr);
                                 }
                                 break;
                             case INT:
                                 if (JsonToken.VALUE_NUMBER_INT.equals(jsonToken)) {
                                     data[position] = parser.getValueAsInt();
                                 } else {
-                                    log.error("Avro message " + avroMessage + "contains incompatible attribute types " +
-                                            "and values. Value " + parser.getText() + " is not compatible with type " +
-                                            "INT. Hence dropping the message.");
-                                    return null;
+                                    String errStr = "Avro message " + avroMessage + "contains incompatible attribute " +
+                                            "types and values. Value " + parser.getText() + " is not compatible with " +
+                                            "type INT. Hence dropping the message.";
+                                    log.error(errStr);
+                                    throw new MappingFailedException(errStr);
                                 }
                                 break;
                             case DOUBLE:
                                 if (JsonToken.VALUE_NUMBER_FLOAT.equals(jsonToken)) {
                                     data[position] = parser.getValueAsDouble();
                                 } else {
-                                    log.error("Avro message " + avroMessage + "contains incompatible attribute types " +
-                                            "and values. Value " + parser.getText() + " is not compatible with type " +
-                                            "DOUBLE. Hence dropping the message.");
-                                    return null;
+                                    String errStr = "Avro message " + avroMessage + "contains incompatible attribute " +
+                                            "types and values. Value " + parser.getText() + " is not compatible with " +
+                                            "type DOUBLE. Hence dropping the message.";
+                                    log.error(errStr);
+                                    throw new MappingFailedException(errStr);
                                 }
                                 break;
                             case STRING:
@@ -395,20 +419,22 @@ public class AvroSourceMapper extends SourceMapper {
                                     data[position] = attributeConverter.getPropertyValue(parser.getValueAsString(),
                                             Attribute.Type.FLOAT);
                                 } else {
-                                    log.error("Avro message " + avroMessage + "contains incompatible attribute types " +
-                                            "and values. Value " + parser.getText() + " is not compatible with type " +
-                                            "FLOAT. Hence dropping the message.");
-                                    return null;
+                                    String errStr = "Avro message " + avroMessage + "contains incompatible attribute " +
+                                            "types and values. Value " + parser.getText() + " is not compatible with " +
+                                            "type FLOAT. Hence dropping the message.";
+                                    log.error(errStr);
+                                    throw new MappingFailedException(errStr);
                                 }
                                 break;
                             case LONG:
                                 if (JsonToken.VALUE_NUMBER_INT.equals(jsonToken)) {
                                     data[position] = parser.getValueAsLong();
                                 } else {
-                                    log.error("Avro message " + avroMessage + "contains incompatible attribute types " +
-                                            "and values. Value " + parser.getText() + " is not compatible with type " +
-                                            "LONG. Hence dropping the message.");
-                                    return null;
+                                    String errStr = "Avro message " + avroMessage + "contains incompatible attribute " +
+                                            "types and values. Value " + parser.getText() + " is not compatible with " +
+                                            "type LONG. Hence dropping the message.";
+                                    log.error(errStr);
+                                    throw new MappingFailedException(errStr);
                                 }
                                 break;
                             case OBJECT:
@@ -443,8 +469,9 @@ public class AvroSourceMapper extends SourceMapper {
                     }
                 }
             } catch (IOException e) {
-                log.error("Avro message " + avroMessage + " cannot be converted to siddhi event.");
-                return null;
+                String errStr = "Avro message " + avroMessage + " cannot be converted to siddhi event.";
+                log.error(errStr, e);
+                throw new MappingFailedException(errStr, e);
             }
         }
         eventList.add(event);
@@ -455,7 +482,7 @@ public class AvroSourceMapper extends SourceMapper {
      * The method returns a null instead of a byte[0] to enhance the performance.
      * Creation of empty byte array and length > 0 check for each event conversion is costly
      */
-    private Event[] convertToEventArrayForCustomMapping(JsonObject[] eventObjects) {
+    private Event[] convertToEventArrayForCustomMapping(JsonObject[] eventObjects) throws MappingFailedException {
         List<Event> eventList = new ArrayList<>();
         for (JsonObject jsonEvent : eventObjects) {
             Event[] event = convertToSingleEventForCustomMapping(jsonEvent.toString());
@@ -470,7 +497,7 @@ public class AvroSourceMapper extends SourceMapper {
      * The method returns a null instead of a byte[0] to enhance the performance.
      * Creation of empty byte array and length > 0 check for each event conversion is costly
      */
-    private Event[] convertToSingleEventForCustomMapping(String avroMessage) {
+    private Event[] convertToSingleEventForCustomMapping(String avroMessage) throws MappingFailedException {
         Configuration conf = Configuration.defaultConfiguration();
         ReadContext readContext = JsonPath.parse(avroMessage);
         List<Event> eventList = new ArrayList<>();
@@ -519,8 +546,10 @@ public class AvroSourceMapper extends SourceMapper {
                                             " Hence event data value is set to null");
                             }
                         } catch (IOException e) {
-                            throw new SiddhiAppRuntimeException("Initializing a parser failed for the event string."
-                                    + mappedValue.toString());
+                            String errStr = "Initializing a parser failed for the event string." +
+                                    mappedValue.toString();
+                            log.error(errStr, e);
+                            throw new MappingFailedException(errStr, e);
                         }
                     } else {
                         data[position] = attributeConverter.getPropertyValue(mappedValue.toString(),
