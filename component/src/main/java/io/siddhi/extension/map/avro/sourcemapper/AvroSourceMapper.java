@@ -52,10 +52,16 @@ import io.siddhi.query.api.definition.StreamDefinition;
 import net.minidev.json.JSONArray;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaParseException;
+import org.apache.avro.generic.GenericDatumWriter;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.io.EncoderFactory;
+import org.apache.avro.io.JsonEncoder;
 import org.apache.log4j.Logger;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -99,7 +105,16 @@ import java.util.List;
                                 " a default value.",
                         type = {DataType.BOOL},
                         optional = true,
-                        defaultValue = "true")
+                        defaultValue = "true"),
+                @Parameter(name = "use.avro.deserializer",
+                        description = "Set this parameter to true when you use the class " +
+                                "io.confluent.kafka.serializers.KafkaAvroDeserializer as the value " +
+                                "deserializer when creating the Kafka consumer configs. " +
+                                "When set to false, org.apache.kafka.common.serialization.ByteArrayDeserializer " +
+                                "will be used.",
+                        optional = true,
+                        defaultValue = "false",
+                        type = {DataType.BOOL})
         },
         examples = {
                 @Example(
@@ -142,6 +157,7 @@ public class AvroSourceMapper extends SourceMapper {
     private static final String SCHEMA_REGISTRY = "registry";
     private static final String SCHEMA_ID = "id";
     private static final String FAIL_ON_MISSING_ATTRIBUTE_IDENTIFIER = "fail.on.missing.attribute";
+    public static final String USE_AVRO_DESERIALIZER = "use.avro.deserializer";
 
     private StreamDefinition streamDefinition;
     private List<Attribute> streamAttributes;
@@ -154,6 +170,7 @@ public class AvroSourceMapper extends SourceMapper {
     private ObjectMapper objectMapper = new ObjectMapper();
     private Gson gson = new Gson();
     private Schema schema;
+    private boolean useAvroDeserializer;
 
     /**
      * Initialize the mapper and the mapping configurations.
@@ -189,6 +206,8 @@ public class AvroSourceMapper extends SourceMapper {
                         concat(SCHEMA_REGISTRY), null),
                 optionHolder.validateAndGetStaticValue(DEFAULT_AVRO_MAPPING_PREFIX.concat(".").
                         concat(SCHEMA_ID), null), streamDefinition.getId());
+        useAvroDeserializer = Boolean.parseBoolean(
+                optionHolder.validateAndGetStaticValue(USE_AVRO_DESERIALIZER, "false"));
     }
 
     private Schema getAvroSchema(String schemaDefinition, String schemaRegistryURL, String schemaID,
@@ -251,55 +270,68 @@ public class AvroSourceMapper extends SourceMapper {
         }
     }
 
+    public static String toJsonString(Schema schema, GenericRecord genericRecord) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        GenericDatumWriter<GenericRecord> writer = new GenericDatumWriter<>(schema);
+        JsonEncoder encoder = EncoderFactory.get().jsonEncoder(schema, baos, false);
+        writer.write(genericRecord, encoder);
+        encoder.flush();
+        return baos.toString(Charset.defaultCharset().name());
+    }
+
     private Event[] convertToEvents(Object eventObject, List<ErroneousEvent> failedEvents)
             throws MappingFailedException {
-        byte[] binaryEvent;
+        byte[] binaryEvent = new byte[0];
         if (eventObject instanceof byte[]) {
             binaryEvent = (byte[]) eventObject;
         } else if (eventObject instanceof ByteBuffer) {
             binaryEvent = ((ByteBuffer) eventObject).array();
-        } else {
-            log.error("Event object is invalid. Expected byte Array or ByteBuffer, but found "
+        } else if (!(eventObject instanceof GenericRecord)) {
+            log.error("Event object is invalid. Expected byte Array, GenericRecord or ByteBuffer , but found "
                     + eventObject.getClass().getCanonicalName());
             failedEvents.add(new ErroneousEvent(eventObject,
                     "Event object is invalid. Expected byte Array or ByteBuffer, but found "
                             + eventObject.getClass().getCanonicalName()));
             return null;
         }
-        Object jsonObj;
-        try {
-            jsonObj = AvroMessageProcessor.deserializeByteArray(binaryEvent, schema, failedEvents);
-        } catch (Throwable t) {
-            log.error("Error when converting avro message of schema: " + schema.toString() +
-                    " to siddhi event. " + t.getMessage() + ". Hence dropping the event.");
-            failedEvents.add(new ErroneousEvent(eventObject, t,
-                    "Error when converting avro message of schema: " + schema.toString() +
-                            " to siddhi event. " + t.getMessage() + ". Hence dropping the event."));
-            return null;
+        String avroMessage = null;
+        if (useAvroDeserializer) {
+            try {
+                avroMessage = toJsonString(schema, (GenericRecord) eventObject);
+            } catch (IOException e) {
+                log.error("Failed to convert received GenericRecord object to Json string for schema "
+                        + schema.toString() + ". Reason: " + e.getMessage());
+                failedEvents.add(new ErroneousEvent(eventObject, "Failed to convert received " +
+                        "GenericRecord object to Json string for schema "
+                        + schema.toString() + ". Reason: " + e.getMessage()));
+            }
+        } else {
+            Object record = AvroMessageProcessor.deserializeByteArray(binaryEvent, schema, failedEvents);
+            if (record == null) {
+                return null;
+            }
+            avroMessage = record.toString();
         }
 
-        if (jsonObj != null) {
-            String avroMessage = jsonObj.toString();
-            if (!isJsonValid(avroMessage)) {
-                log.error("Invalid Avro message :" + avroMessage + " for schema " + schema.toString());
-                failedEvents.add(new ErroneousEvent(eventObject,
-                        "Invalid Avro message :" + avroMessage + " for schema " + schema.toString()));
-            } else {
-                ReadContext readContext = JsonPath.parse(avroMessage);
-                Object avroObj = readContext.read(DEFAULT_JSON_PATH);
-                if (avroObj instanceof JSONArray) {
-                    JsonObject[] eventObjects = gson.fromJson(avroMessage, JsonObject[].class);
-                    if (isCustomMappingEnabled) {
-                        return convertToEventArrayForCustomMapping(eventObjects);
-                    } else {
-                        return convertToEventArrayForDefaultMapping(eventObjects, failedEvents, eventObject);
-                    }
+        if (avroMessage != null && !isJsonValid(avroMessage)) {
+            log.error("Invalid Avro message :" + avroMessage + " for schema " + schema.toString());
+            failedEvents.add(new ErroneousEvent(eventObject,
+                    "Invalid Avro message :" + avroMessage + " for schema " + schema.toString()));
+        } else {
+            ReadContext readContext = JsonPath.parse(avroMessage);
+            Object avroObj = readContext.read(DEFAULT_JSON_PATH);
+            if (avroObj instanceof JSONArray) {
+                JsonObject[] eventObjects = gson.fromJson(avroMessage, JsonObject[].class);
+                if (isCustomMappingEnabled) {
+                    return convertToEventArrayForCustomMapping(eventObjects);
                 } else {
-                    if (isCustomMappingEnabled) {
-                        return convertToSingleEventForCustomMapping(avroMessage);
-                    } else {
-                        return convertToSingleEventForDefaultMapping(avroMessage);
-                    }
+                    return convertToEventArrayForDefaultMapping(eventObjects, failedEvents, eventObject);
+                }
+            } else {
+                if (isCustomMappingEnabled) {
+                    return convertToSingleEventForCustomMapping(avroMessage);
+                } else {
+                    return convertToSingleEventForDefaultMapping(avroMessage);
                 }
             }
         }
