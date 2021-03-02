@@ -301,7 +301,7 @@ public class AvroSourceMapperTestCase {
         AssertJUnit.assertEquals("ERROR - Error occured when deserializing avro byte stream " +
                 "conforming to schema {\"type\":\"record\",\"name\":\"user\",\"namespace\":\"avro.user\"," +
                 "\"fields\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"favorite_number\",\"type\":" +
-                "\"float\"}]}. Hence dropping the event.", out.toString().trim());
+                "\"float\"}]}. Hence dropping the event. Reason: null", out.toString().trim());
         AssertJUnit.assertFalse(eventArrived);
         siddhiAppRuntime.shutdown();
     }

@@ -42,7 +42,6 @@ import org.apache.avro.SchemaParseException;
 import org.apache.log4j.Logger;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +73,16 @@ import java.util.Map;
                         description = "This specifies the ID of the avro schema. This ID is the global ID that is " +
                                 "returned from the schema registry when posting the schema to the registry. " +
                                 "The specified ID is used to retrieve the schema from the schema registry.",
-                        type = {DataType.STRING})
+                        type = {DataType.STRING}),
+                @Parameter(name = "use.avro.serializer",
+                        description = "Set this parameter to true when you use the class " +
+                                "io.confluent.kafka.serializers.KafkaAvroSerializer as the value " +
+                                "serializer when creating the Kafka producer. " +
+                                "When set to false, org.apache.kafka.common.serialization.ByteArraySerializer " +
+                                "will be used.",
+                        optional = true,
+                        defaultValue = "false",
+                        type = {DataType.BOOL})
         },
         examples = {
                 @Example(
@@ -106,10 +114,12 @@ public class AvroSinkMapper extends SinkMapper {
     private static final String UNDEFINED = "undefined";
     private static final String SCHEMA_REGISTRY = "registry";
     private static final String SCHEMA_ID = "id";
+    public static final String USE_AVRO_SERIALIZER = "use.avro.serializer";
 
     private String[] attributeNameArray;
     private Schema schema;
     private List<Attribute> attributeList;
+    private boolean useAvroSerializer;
 
     /**
      * Initialize the mapper and the mapping configurations.
@@ -140,11 +150,13 @@ public class AvroSinkMapper extends SinkMapper {
                         concat(SCHEMA_REGISTRY), null),
                 optionHolder.validateAndGetStaticValue(DEFAULT_AVRO_MAPPING_PREFIX.concat(".").
                         concat(SCHEMA_ID), null), streamDefinition.getId());
+        useAvroSerializer = Boolean.parseBoolean(
+                optionHolder.validateAndGetStaticValue(USE_AVRO_SERIALIZER, "false"));
     }
 
     private Schema getAvroSchema(String schemaDefinition, String schemaRegistryURL, String schemaID,
                                  String streamName) {
-        Schema returnSchema = null;
+        Schema returnSchema;
         try {
             if (schemaDefinition != null) {
                 returnSchema = new Schema.Parser().parse(schemaDefinition);
@@ -164,7 +176,8 @@ public class AvroSinkMapper extends SinkMapper {
             throw new SiddhiAppCreationException("Unable to parse Schema for stream:" + streamName + ". " +
                     e.getMessage());
         } catch (FeignException e) {
-            throw new SiddhiAppCreationException("Error when retriving schema from schema registry. " + e.getMessage());
+            throw new SiddhiAppCreationException(
+                    "Error when retrieving schema from schema registry. " + e.getMessage());
         }
         if (returnSchema == null) {
             throw new SiddhiAppCreationException("Error when generating Avro Schema for stream: "
@@ -176,52 +189,44 @@ public class AvroSinkMapper extends SinkMapper {
     @Override
     public void mapAndSend(Event[] events, OptionHolder optionHolder, Map<String, TemplateBuilder>
             payloadTemplateBuilderMap, SinkListener sinkListener) {
-        List<byte[]> data = new ArrayList<>();
         for (Event event : events) {
-            byte[] returnedData = mapSingleEvent(event, payloadTemplateBuilderMap);
-            if (returnedData != null) {
-                data.add(returnedData);
-            }
-        }
-        for (byte[] message : data) {
-            sinkListener.publish(ByteBuffer.wrap(message));
+            sinkListener.publish(mapSingleEvent(event, payloadTemplateBuilderMap));
         }
     }
 
     @Override
     public void mapAndSend(Event event, OptionHolder optionHolder, Map<String, TemplateBuilder>
             payloadTemplateBuilderMap, SinkListener sinkListener) {
-        byte[] data = null;
-        data = mapSingleEvent(event, payloadTemplateBuilderMap);
-        if (data != null) {
-            sinkListener.publish(ByteBuffer.wrap(data));
+        Object mappedEvent = mapSingleEvent(event, payloadTemplateBuilderMap);
+        if (mappedEvent != null) {
+            sinkListener.publish(mappedEvent);
         }
     }
 
-    private byte[] mapSingleEvent(Event event, Map<String, TemplateBuilder>
-            payloadTemplateBuilderMap) {
-        byte[] data = null;
+    private Object mapSingleEvent(Event event, Map<String, TemplateBuilder> payloadTemplateBuilderMap) {
+        Object object;
         if (payloadTemplateBuilderMap == null) {
-            data = constructAvroForDefaultMapping(event);
+            object = constructAvroForDefaultMapping(event);
         } else {
-            data = constructAvroForCustomMapping(event, payloadTemplateBuilderMap.get(
+            object = constructAvroForCustomMapping(event, payloadTemplateBuilderMap.get(
                     payloadTemplateBuilderMap.keySet().iterator().next()));
         }
-        return data;
+        return object;
     }
 
     /**
      * The method returns a null instead of a byte[0] to enhance the performance.
      * Creation of empty byte array and length > 0 check for each event conversion is costly
      */
-    private byte[] constructAvroForDefaultMapping(Object eventObj) {
-        byte[] convertedEvent = null;
+    private Object constructAvroForDefaultMapping(Object eventObj) {
+        Object convertedEvent = null;
 
         if (eventObj instanceof Event) {
             Event event = (Event) eventObj;
             JsonObject jsonEvent = constructSingleEventForDefaultMapping(event);
             try {
-                convertedEvent = AvroMessageProcessor.serializeAvroMessage(jsonEvent.toString(), schema);
+                convertedEvent = AvroMessageProcessor.serializeAvroMessage(
+                        jsonEvent.toString(), schema, useAvroSerializer);
             } catch (Throwable t) {
                 log.error("Error when converting siddhi event: " + Arrays.toString(event.getData()) +
                         " to Avro message of schema: " + schema + "." + t.getMessage() +
@@ -239,10 +244,10 @@ public class AvroSinkMapper extends SinkMapper {
      * The method returns a null instead of a byte[0] to enhance the performance.
      * Creation of empty byte array and length > 0 check for each event conversion is costly
      */
-    private byte[] constructAvroForCustomMapping(Event event, TemplateBuilder payloadTemplateBuilder) {
+    private Object constructAvroForCustomMapping(Event event, TemplateBuilder payloadTemplateBuilder) {
         String jsonString = (String) payloadTemplateBuilder.build(doPartialProcessing(event));
         try {
-            return AvroMessageProcessor.serializeAvroMessage(jsonString, schema);
+            return AvroMessageProcessor.serializeAvroMessage(jsonString, schema, useAvroSerializer);
         } catch (Throwable t) {
             log.error("Error when converting siddhi event: " + Arrays.toString(event.getData()) +
                     " to Avro message of schema: " + schema + "." + t.getMessage() +

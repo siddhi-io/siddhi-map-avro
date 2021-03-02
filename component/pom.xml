@@ -164,26 +164,21 @@
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
                             com.jayway.jsonpath.*,
-                            org.apache.tapestry5.json.*,
                             net.minidev.*,
                             org.objectweb.asm.*,
-                            com.google.gson.*,
-                            org.apache.avro.*,
-                            org.codehaus.jackson.*,
                             avro.shaded.com.google.common.*,
                             com.thoughtworks.paranamer.*,
                             org.apache.commons.compress.utils.*,
                             org.apache.commons.compress.compressors.*,
-                            org.joda.time.*,
                             org.xerial.snappy.*,
                             org.apache.commons.compress.archivers.*,
                             feign.*,
                             okhttp3.*,
                             okio.*,
-                            javax.inject,
                             org.tukaani.xz,
                         </Private-Package>
                         <Export-Package>
+                            org.apache.avro.*,
                             io.siddhi.extension.map.avro.*
                         </Export-Package>
                         <Import-Package>
@@ -194,12 +189,9 @@
                             org.json,
                             org.osgi.framework.*;version="${org.osgi.framework.version.range}",
                             org.slf4j.*;version="${org.slf4j.version.range}",
-                            org.w3c.dom.*,
                             io.siddhi.annotation.*;version="${io.siddhi.version.range}",
                             io.siddhi.core.*;version="${io.siddhi.version.range}",
-                            io.siddhi.query.api.definition.*;version="${io.siddhi.version.range}",
-                            org.xml.sax.*,
-                            sun.misc.*
+                            io.siddhi.query.api.definition.*;version="${io.siddhi.version.range}"
                     </Import-Package>
                         <Include-Resource>
                             META-INF=target/classes/META-INF
