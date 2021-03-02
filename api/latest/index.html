@@ -114,7 +114,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#api-docs-v210" tabindex="1" class="md-skip">
+      <a href="#api-docs-v220" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -358,6 +358,18 @@
   
 </nav>
     
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../2.2.0/" title="2.2.0" class="md-nav__link">
+      2.2.0
+    </a>
   </li>
 
         
@@ -1369,7 +1381,7 @@
                   <a href="https://github.com/siddhi-io/siddhi-map-avro/blob/master/api/latest.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="api-docs-v210">API Docs - v2.1.0</h1>
+                <h1 id="api-docs-v220">API Docs - v2.2.0</h1>
 <div class="admonition info">
 <p class="admonition-title">Tested Siddhi Core version: <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/">5.1.14</a></em></p>
 <p>It could also support other Siddhi Core minor versions.</p>
@@ -1380,7 +1392,7 @@
 <p style="word-wrap: break-word;margin: 0;">This extension is a Siddhi Event to Avro Message output mapper.Transports that publish  messages to Avro sink can utilize this extension to convert Siddhi events to Avro messages.<br>&nbsp;You can either specify the Avro schema or provide the schema registry URL and the schema reference ID as parameters in the stream definition.<br>If no Avro schema is specified, a flat Avro schema of the 'record' type is generated with the stream attributes as schema fields.</p>
 <p></p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
-<pre><code>@sink(..., @map(type=&quot;avro&quot;, schema.def=&quot;&lt;STRING&gt;&quot;, schema.registry=&quot;&lt;STRING&gt;&quot;, schema.id=&quot;&lt;STRING&gt;&quot;)
+<pre><code>@sink(..., @map(type=&quot;avro&quot;, schema.def=&quot;&lt;STRING&gt;&quot;, schema.registry=&quot;&lt;STRING&gt;&quot;, schema.id=&quot;&lt;STRING&gt;&quot;, use.avro.serializer=&quot;&lt;BOOL&gt;&quot;)
 </code></pre>
 
 <p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -1417,6 +1429,14 @@
         <td style="vertical-align: top">No</td>
         <td style="vertical-align: top">No</td>
     </tr>
+    <tr>
+        <td style="vertical-align: top">use.avro.serializer</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">Set this parameter to true when you use the class io.confluent.kafka.serializers.KafkaAvroSerializer as the value serializer when creating the Kafka producer. When set to false, org.apache.kafka.common.serialization.ByteArraySerializer will be used.</p></td>
+        <td style="vertical-align: top">false</td>
+        <td style="vertical-align: top">BOOL</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
 </table></p>
 <p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
 <span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
@@ -1448,7 +1468,7 @@ define stream StockStream (symbol string, price float, volume long);
 <p style="word-wrap: break-word;margin: 0;">This extension is an Avro to Event input mapper. Transports that accept Avro messages can utilize this extension to convert the incoming Avro messages to Siddhi events.<br>&nbsp;The Avro schema to be used for creating Avro messages can be specified as a parameter in the stream definition.<br>&nbsp;If no Avro schema is specified, a flat avro schema of the 'record' type is generated with the stream attributes as schema fields.<br>The generated/specified Avro schema is used to convert Avro messages to Siddhi events.</p>
 <p></p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
-<pre><code>@source(..., @map(type=&quot;avro&quot;, schema.def=&quot;&lt;STRING&gt;&quot;, schema.registry=&quot;&lt;STRING&gt;&quot;, schema.id=&quot;&lt;STRING&gt;&quot;, fail.on.missing.attribute=&quot;&lt;BOOL&gt;&quot;)
+<pre><code>@source(..., @map(type=&quot;avro&quot;, schema.def=&quot;&lt;STRING&gt;&quot;, schema.registry=&quot;&lt;STRING&gt;&quot;, schema.id=&quot;&lt;STRING&gt;&quot;, fail.on.missing.attribute=&quot;&lt;BOOL&gt;&quot;, use.avro.deserializer=&quot;&lt;BOOL&gt;&quot;)
 </code></pre>
 
 <p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -1489,6 +1509,14 @@ define stream StockStream (symbol string, price float, volume long);
         <td style="vertical-align: top">fail.on.missing.attribute</td>
         <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">If this parameter is set to 'true', a JSON execution failing or returning a null value results in that message being dropped by the system.<br>If this parameter is set to 'false', a JSON execution failing or returning a null value results in the system being prompted to send the event with a null value to Siddhi so that the user can handle it as required (i.e., by assigning a default value.</p></td>
         <td style="vertical-align: top">true</td>
+        <td style="vertical-align: top">BOOL</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">use.avro.deserializer</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">Set this parameter to true when you use the class io.confluent.kafka.serializers.KafkaAvroDeserializer as the value deserializer when creating the Kafka consumer configs. When set to false, org.apache.kafka.common.serialization.ByteArrayDeserializer will be used.</p></td>
+        <td style="vertical-align: top">false</td>
         <td style="vertical-align: top">BOOL</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
@@ -1565,13 +1593,13 @@ define stream UserStream (name string, age int );
           </a>
         
         
-          <a href="../2.1.0/" title="2.1.0" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../2.2.0/" title="2.2.0" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                2.1.0
+                2.2.0
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
