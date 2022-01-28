@@ -27,7 +27,8 @@ import org.apache.avro.io.Decoder;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -39,7 +40,7 @@ import java.util.List;
  * json string to byte array.
  */
 public class AvroMessageProcessor {
-    private static final Logger log = Logger.getLogger(AvroMessageProcessor.class);
+    private static final Logger log = LogManager.getLogger(AvroMessageProcessor.class);
 
     public static Object serializeAvroMessage(String jsonString, Schema schema, boolean useAvroSerializer) {
         Decoder decoder;

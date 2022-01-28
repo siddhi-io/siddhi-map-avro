@@ -28,24 +28,20 @@ import io.siddhi.core.util.transport.InMemoryBroker;
 import io.siddhi.core.util.transport.SubscriberUnAvailableException;
 import io.siddhi.extension.map.avro.AvroSchemaDefinitions;
 import io.siddhi.extension.map.avro.ConnectionTestUtil;
-import io.siddhi.extension.map.avro.util.AvroMessageProcessor;
-import io.siddhi.extension.map.avro.util.schema.RecordSchema;
+import io.siddhi.extension.map.avro.UnitTestAppender;
 import org.I0Itec.zkclient.exception.ZkTimeoutException;
-import org.apache.log4j.Appender;
-import org.apache.log4j.Layout;
-import org.apache.log4j.Logger;
-import org.apache.log4j.SimpleLayout;
-import org.apache.log4j.WriterAppender;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class AvroSourceMapperTestCase {
-    private static Logger log = Logger.getLogger(AvroSourceMapperTestCase.class);
+    private static final Logger log = (Logger) LogManager.getLogger(AvroSourceMapperTestCase.class);
     private static String schemaRegistryURL = "http://localhost:8081";
     private AtomicInteger count = new AtomicInteger();
     private volatile boolean eventArrived;
@@ -289,21 +285,24 @@ public class AvroSourceMapperTestCase {
         });
 
         byte[] data = AvroSchemaDefinitions.createSimpleAvroMessage();
-        Logger logger = Logger.getLogger(AvroMessageProcessor.class);
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        Layout layout = new SimpleLayout();
-        Appender appender = new WriterAppender(layout, out);
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
         logger.addAppender(appender);
+        appender.start();
 
         siddhiAppRuntime.start();
         InMemoryBroker.publish("user", ByteBuffer.wrap(data));
 
-        AssertJUnit.assertEquals("ERROR - Error occured when deserializing avro byte stream " +
+        AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                get("UnitTestAppender")).getMessages().contains("Error occured when deserializing avro " +
+                "byte stream " +
                 "conforming to schema {\"type\":\"record\",\"name\":\"user\",\"namespace\":\"avro.user\"," +
                 "\"fields\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"favorite_number\",\"type\":" +
-                "\"float\"}]}. Hence dropping the event. Reason: null", out.toString().trim());
+                "\"float\"}]}. Hence dropping the event. Reason: null"));
         AssertJUnit.assertFalse(eventArrived);
         siddhiAppRuntime.shutdown();
+        logger.removeAppender(appender);
     }
 
     @Test(description = "Check if Avro source generates avro schema from stream attributes and " +
@@ -356,16 +355,19 @@ public class AvroSourceMapperTestCase {
                 "insert into BarStream; ";
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        Logger logger = Logger.getLogger(RecordSchema.class);
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        Layout layout = new SimpleLayout();
-        Appender appender = new WriterAppender(layout, out);
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
         logger.addAppender(appender);
+        appender.start();
 
         siddhiManager.createSiddhiAppRuntime(streams + query);
 
-        AssertJUnit.assertEquals("ERROR - Stream attribute: price has data type:OBJECT which " +
-                "is not supported by avro schema generation.", out.toString().trim());
+        AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                get("UnitTestAppender")).getMessages().contains("Stream attribute: price has data " +
+                "type:OBJECT which " +
+                "is not supported by avro schema generation."));
+        logger.removeAppender(appender);
     }
 
     @Test(description = "Check Avro source mapper for custom avro message mapping to siddhi events" +

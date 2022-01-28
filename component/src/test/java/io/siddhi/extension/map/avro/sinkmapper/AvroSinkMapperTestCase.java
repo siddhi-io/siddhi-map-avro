@@ -29,20 +29,17 @@ import io.siddhi.core.util.error.handler.model.ErroneousEvent;
 import io.siddhi.core.util.transport.InMemoryBroker;
 import io.siddhi.extension.map.avro.AvroSchemaDefinitions;
 import io.siddhi.extension.map.avro.ConnectionTestUtil;
+import io.siddhi.extension.map.avro.UnitTestAppender;
 import io.siddhi.extension.map.avro.util.AvroMessageProcessor;
-import io.siddhi.extension.map.avro.util.schema.RecordSchema;
 import org.apache.avro.SchemaParseException;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.log4j.Appender;
-import org.apache.log4j.Layout;
-import org.apache.log4j.Logger;
-import org.apache.log4j.SimpleLayout;
-import org.apache.log4j.WriterAppender;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -51,7 +48,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class AvroSinkMapperTestCase {
-    private static final Logger log = Logger.getLogger(AvroSinkMapperTestCase.class);
+    private static final Logger log = (Logger) LogManager.getLogger(AvroSinkMapperTestCase.class);
     private static String schemaRegistryURL = "http://localhost:8081";
     private AtomicInteger count = new AtomicInteger();
     private boolean eventArrived;
@@ -249,22 +246,23 @@ public class AvroSinkMapperTestCase {
 
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
 
-        Logger logger = Logger.getLogger(AvroSinkMapper.class);
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        Layout layout = new SimpleLayout();
-        Appender appender = new WriterAppender(layout, out);
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
         logger.addAppender(appender);
+        appender.start();
 
         siddhiAppRuntime.start();
         fooStream.send(new Object[]{"WSO2", 4});
-
-        AssertJUnit.assertEquals("ERROR - Error when converting siddhi event: [WSO2] " +
+        AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                get("UnitTestAppender")).getMessages().contains("Error when converting siddhi event: [WSO2] " +
                 "to Avro message of schema: {\"type\":\"record\",\"name\":\"user\",\"namespace\":\"avro.user\"," +
                 "\"fields\":[{\"name\":\"username\",\"type\":\"string\"}]}." +
-                "Expected field name not found: username. Hence dropping the event.", out.toString().trim());
+                "Expected field name not found: username. Hence dropping the event."));
         AssertJUnit.assertFalse(eventArrived);
         InMemoryBroker.unsubscribe(subscriber);
         siddhiAppRuntime.shutdown();
+        logger.removeAppender(appender);
     }
 
     @Test(description = "Check Avro sink mapper drops the event when sink avro schema " +
@@ -305,23 +303,26 @@ public class AvroSinkMapperTestCase {
         InMemoryBroker.subscribe(subscriber);
         InputHandler userStream = siddhiAppRuntime.getInputHandler("userStream");
 
-        Logger logger = Logger.getLogger(AvroSinkMapper.class);
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        Layout layout = new SimpleLayout();
-        Appender appender = new WriterAppender(layout, out);
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
         logger.addAppender(appender);
+        appender.start();
 
         siddhiAppRuntime.start();
         userStream.send(new Object[]{"WSO2", 4});
 
-        AssertJUnit.assertEquals("ERROR - Error when converting siddhi event: [WSO2, 4] " +
+        AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                get("UnitTestAppender")).getMessages().contains("Error when converting " +
+                "siddhi event: [WSO2, 4] " +
                 "to Avro message of schema: {\"type\":\"record\",\"name\":\"userProfile\"," +
                 "\"namespace\":\"avro.userProfile\",\"fields\":[{\"name\":\"name\",\"type\":\"string\"}" +
                 ",{\"name\":\"age\",\"type\":[\"int\",\"null\"]}]}." +
-                "Expected start-union. Got VALUE_NUMBER_INT. Hence dropping the event.", out.toString().trim());
+                "Expected start-union. Got VALUE_NUMBER_INT. Hence dropping the event."));
         AssertJUnit.assertFalse(eventArrived);
         InMemoryBroker.unsubscribe(subscriber);
         siddhiAppRuntime.shutdown();
+        logger.removeAppender(appender);
     }
 
     @Test(description = "Check Avro sink mapper default conversion for an array of siddhi events")
@@ -410,16 +411,19 @@ public class AvroSinkMapperTestCase {
                 "insert into BarStream; ";
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        Logger logger = Logger.getLogger(RecordSchema.class);
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        Layout layout = new SimpleLayout();
-        Appender appender = new WriterAppender(layout, out);
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
         logger.addAppender(appender);
+        appender.start();
 
         siddhiManager.createSiddhiAppRuntime(streams + query);
 
-        AssertJUnit.assertEquals("ERROR - Stream attribute: name has data type: OBJECT " +
-                "which is not supported by avro schema generation", out.toString().trim());
+        AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                get("UnitTestAppender")).getMessages().contains("Stream attribute: name has data " +
+                "type: OBJECT " +
+                "which is not supported by avro schema generation"));
+        logger.removeAppender(appender);
     }
 
     @Test(description = "Check Avro sink generates avro schema from stream attributes and " +
