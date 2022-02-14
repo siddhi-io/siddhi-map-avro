@@ -266,7 +266,7 @@
         </plugins>
     </build>
     <properties>
-        <siddhi.version>5.1.21-SNAPSHOT</siddhi.version>
+        <siddhi.version>5.1.21</siddhi.version>
         <log4j.version>2.17.1</log4j.version>
         <version.log4j>1.2.17</version.log4j>
         <carbon.feature.plugin.version>3.0.0</carbon.feature.plugin.version>
