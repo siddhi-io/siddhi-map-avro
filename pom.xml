@@ -282,7 +282,7 @@
         <okio.version>1.11.0</okio.version>
         <!--Testing purposes-->
         <kafka_2.11.version>0.10.0.0</kafka_2.11.version>
-        <siddhi-io-kafka>5.0.14-SNAPSHOT</siddhi-io-kafka>
+        <siddhi-io-kafka>5.0.15</siddhi-io-kafka>
         <zookeeper.version>3.4.0</zookeeper.version>
         <curator-test.version>2.7.1</curator-test.version>
         <testng.version>6.8</testng.version>
