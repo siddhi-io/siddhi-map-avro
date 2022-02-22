@@ -21,7 +21,8 @@ import com.google.gson.Gson;
 import io.siddhi.query.api.definition.Attribute;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaParseException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,7 +33,7 @@ import java.util.Map;
  * Class representing a Avro Record schema.
  */
 public class RecordSchema {
-    private static final Logger log = Logger.getLogger(RecordSchema.class);
+    private static final Logger log = LogManager.getLogger(RecordSchema.class);
     private static final String ATTRIBUTE_NAME = "name";
     private static final String ATTRIBUTE_TYPE = "type";
     private static final String SCHEMA_TYPE = "record";

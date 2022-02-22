@@ -39,7 +39,8 @@ import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.StreamDefinition;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaParseException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -108,7 +109,7 @@ import java.util.Map;
 )
 
 public class AvroSinkMapper extends SinkMapper {
-    private static final Logger log = Logger.getLogger(AvroSinkMapper.class);
+    private static final Logger log = LogManager.getLogger(AvroSinkMapper.class);
     private static final String DEFAULT_AVRO_MAPPING_PREFIX = "schema";
     private static final String SCHEMA_IDENTIFIER = "def";
     private static final String UNDEFINED = "undefined";

@@ -25,14 +25,15 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.BinaryEncoder;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.EncoderFactory;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 public class AvroSchemaDefinitions {
 
-    private static final Logger log = Logger.getLogger(AvroSchemaDefinitions.class);
+    private static final Logger log = LogManager.getLogger(AvroSchemaDefinitions.class);
     private static GenericRecord user;
     private static GenericRecord complexUser;
     private static GenericArray arrayOfUsers;

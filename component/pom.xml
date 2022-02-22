@@ -43,8 +43,8 @@
             <artifactId>siddhi-annotations</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.log4j.wso2</groupId>
-            <artifactId>log4j</artifactId>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.avro</groupId>
@@ -89,17 +89,23 @@
             <groupId>org.apache.zookeeper</groupId>
             <artifactId>zookeeper</artifactId>
             <version>${zookeeper.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka_2.11</artifactId>
             <version>${kafka_2.11.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <scope>test</scope>
-            <version>${commons-io.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.curator</groupId>
@@ -110,6 +116,11 @@
             <groupId>io.siddhi.extension.io.kafka</groupId>
             <artifactId>siddhi-io-kafka</artifactId>
             <version>${siddhi-io-kafka}</version>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -185,10 +196,8 @@
                             com.fasterxml.jackson.databind.*;version="${com.fasterxml.jackson.databind.range}",
                             javax.annotation,
                             javax.xml,
-                            org.apache.log4j.*;version="${org.apache.log4j.version.range}",
                             org.json,
                             org.osgi.framework.*;version="${org.osgi.framework.version.range}",
-                            org.slf4j.*;version="${org.slf4j.version.range}",
                             io.siddhi.annotation.*;version="${io.siddhi.version.range}",
                             io.siddhi.core.*;version="${io.siddhi.version.range}",
                             io.siddhi.query.api.definition.*;version="${io.siddhi.version.range}"

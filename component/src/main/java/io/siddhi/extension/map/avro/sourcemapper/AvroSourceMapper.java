@@ -56,7 +56,8 @@ import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.io.JsonEncoder;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -150,7 +151,7 @@ import java.util.List;
 
 public class AvroSourceMapper extends SourceMapper {
 
-    private static final Logger log = Logger.getLogger(AvroSourceMapper.class);
+    private static final Logger log = LogManager.getLogger(AvroSourceMapper.class);
     private static final String DEFAULT_AVRO_MAPPING_PREFIX = "schema";
     private static final String SCHEMA_IDENTIFIER = "def";
     private static final String DEFAULT_JSON_PATH = "$";
