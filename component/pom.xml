@@ -78,6 +78,10 @@
             <groupId>com.squareup.okio</groupId>
             <artifactId>okio</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.json.wso2</groupId>
+            <artifactId>json</artifactId>
+        </dependency>
         <!--Testing purposes-->
         <dependency>
             <groupId>org.testng</groupId>
@@ -187,6 +191,7 @@
                             okhttp3.*,
                             okio.*,
                             org.tukaani.xz,
+                            org.json
                         </Private-Package>
                         <Export-Package>
                             org.apache.avro.*,
@@ -196,7 +201,6 @@
                             com.fasterxml.jackson.databind.*;version="${com.fasterxml.jackson.databind.range}",
                             javax.annotation,
                             javax.xml,
-                            org.json,
                             org.osgi.framework.*;version="${org.osgi.framework.version.range}",
                             io.siddhi.annotation.*;version="${io.siddhi.version.range}",
                             io.siddhi.core.*;version="${io.siddhi.version.range}",
