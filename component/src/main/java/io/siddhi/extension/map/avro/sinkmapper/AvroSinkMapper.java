@@ -115,6 +115,7 @@ public class AvroSinkMapper extends SinkMapper {
     private static final String UNDEFINED = "undefined";
     private static final String SCHEMA_REGISTRY = "registry";
     private static final String SCHEMA_ID = "id";
+    private static final String SCHEMA_NAME = "name";
     public static final String USE_AVRO_SERIALIZER = "use.avro.serializer";
 
     private String[] attributeNameArray;
@@ -150,7 +151,9 @@ public class AvroSinkMapper extends SinkMapper {
                 optionHolder.validateAndGetStaticValue(DEFAULT_AVRO_MAPPING_PREFIX.concat(".").
                         concat(SCHEMA_REGISTRY), null),
                 optionHolder.validateAndGetStaticValue(DEFAULT_AVRO_MAPPING_PREFIX.concat(".").
-                        concat(SCHEMA_ID), null), streamDefinition.getId());
+                        concat(SCHEMA_ID), null), streamDefinition.getId(),
+                optionHolder.validateAndGetStaticValue(DEFAULT_AVRO_MAPPING_PREFIX.concat(".").
+                                concat(SCHEMA_NAME), null), streamDefinition.getName());
         useAvroSerializer = Boolean.parseBoolean(
                 optionHolder.validateAndGetStaticValue(USE_AVRO_SERIALIZER, "false"));
     }
@@ -162,8 +165,14 @@ public class AvroSinkMapper extends SinkMapper {
             if (schemaDefinition != null) {
                 returnSchema = new Schema.Parser().parse(schemaDefinition);
             } else if (schemaRegistryURL != null) {
-                SchemaRegistryReader schemaRegistryReader = new SchemaRegistryReader();
-                returnSchema = schemaRegistryReader.getSchemaFromID(schemaRegistryURL, schemaID);
+                if (schemaID != null) {
+                    SchemaRegistryReader schemaRegistryReader = new SchemaRegistryReader();
+                    returnSchema = schemaRegistryReader.getSchemaFromID(schemaRegistryURL, schemaID);
+                }
+                if (streamName != null) {
+                    SchemaRegistryReader schemaRegistryReader = new SchemaRegistryReader();
+                    returnSchema = schemaRegistryReader.getSchemaFromName(schemaRegistryURL, streamName);
+                }
             } else if (attributeList.size() > 0) {
                 log.warn("Schema Definition and Schema Registry is not specified in Stream. Hence generating " +
                         "schema from stream attributes.");

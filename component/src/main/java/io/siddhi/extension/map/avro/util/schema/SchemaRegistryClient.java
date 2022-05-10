@@ -32,4 +32,8 @@ public interface SchemaRegistryClient {
     @RequestLine("GET /schemas/ids/{id}")
     @Headers("Content-Type: application/json")
     LinkedTreeMap findByID(@Param("id") String id);
+
+    @RequestLine("GET /subjects/{schemaName}/versions/latest")
+    @Headers("Content-Type: application/json")
+    LinkedTreeMap findBySchemaName(@Param("schemaName") schemaName id);
 }
