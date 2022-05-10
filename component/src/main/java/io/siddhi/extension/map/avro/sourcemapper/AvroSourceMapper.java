@@ -97,6 +97,10 @@ import java.util.List;
                                         "The schema is retrieved from the schema registry via the specified ID.",
 
                         type = {DataType.STRING}),
+                @Parameter(name = "schema.name",
+                        description =
+                                "This specifies the name of the Avro schema. "
+                        type = {DataType.STRING}),
                 @Parameter(name = "fail.on.missing.attribute",
                         description = "If this parameter is set to 'true', a JSON execution failing or returning a " +
                                 "null value results in that message being dropped by the system.\n" +
