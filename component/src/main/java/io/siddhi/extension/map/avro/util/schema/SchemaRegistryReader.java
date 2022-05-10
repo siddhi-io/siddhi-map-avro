@@ -31,13 +31,23 @@ import org.apache.avro.SchemaParseException;
  */
 public class SchemaRegistryReader {
     public Schema getSchemaFromID(String registryURL, String schemaID) throws SchemaParseException, FeignException {
-        SchemaRegistryClient registryClient = Feign.builder()
+        SchemaRegistryClient registryClient = getSchemaRegistryClient(registryURL);
+        LinkedTreeMap returnedSchema = registryClient.findByID(schemaID);
+        String jsonSchema = returnedSchema.get("schema").toString();
+        return new Schema.Parser().parse(jsonSchema);
+    }
+
+    public Schema getSchemaFromName(String registryURL, String schemaName) throws SchemaParseException, FeignException {
+        SchemaRegistryClient registryClient = getSchemaRegistryClient(registryURL);
+        LinkedTreeMap returnedSchema = registryClient.findBySchemaName(schemaName);
+        String jsonSchema = returnedSchema.get("schema").toString();
+        return new Schema.Parser().parse(jsonSchema);
+    }
+    private SchemaRegistryClient getSchemaRegistryClient(String registryURL){
+        return Feign.builder()
                 .client(new OkHttpClient())
                 .encoder(new GsonEncoder())
                 .decoder(new GsonDecoder())
                 .target(SchemaRegistryClient.class, registryURL);
-        LinkedTreeMap returnedSchema = registryClient.findByID(schemaID);
-        String jsonSchema = returnedSchema.get("schema").toString();
-        return new Schema.Parser().parse(jsonSchema);
     }
 }
