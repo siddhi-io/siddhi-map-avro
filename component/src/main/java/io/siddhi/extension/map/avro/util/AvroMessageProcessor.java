@@ -17,6 +17,8 @@
  */
 package io.siddhi.extension.map.avro.util;
 
+import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
+import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import io.siddhi.core.util.error.handler.model.ErroneousEvent;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericDatumReader;
@@ -73,12 +75,16 @@ public class AvroMessageProcessor {
             Object record = reader.read(null, decoder);
             return record;
         } catch (IOException e) {
-            log.error("Error occured when deserializing avro byte stream conforming " +
+            log.error("Error occurred when deserializing avro byte stream conforming " +
                     "to schema " + schema.toString() + ". Hence dropping the event. Reason: " + e.getMessage());
             failedEvents.add(new ErroneousEvent(data,
                     "Error occurred when deserializing avro byte stream conforming " +
                             "to schema " + schema.toString() + ". Hence dropping the event."));
             return null;
         }
+    }
+
+    public static Object deserializeByDeserializer(byte[] data, Schema schema, CachedSchemaRegistryClient client) {
+        return new KafkaAvroDeserializer(client).deserialize(schema.getName(), data, schema);
     }
 }

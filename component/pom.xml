@@ -52,6 +52,10 @@
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>
@@ -126,6 +130,19 @@
             <artifactId>log4j</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Confluent dependencies -->
+        <dependency>
+            <groupId>io.confluent</groupId>
+            <artifactId>kafka-schema-registry-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.confluent</groupId>
+            <artifactId>kafka-avro-serializer</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.confluent</groupId>
+            <artifactId>kafka-streams-avro-serde</artifactId>
+        </dependency>
     </dependencies>
 
     <profiles>
@@ -191,20 +208,24 @@
                             okhttp3.*,
                             okio.*,
                             org.tukaani.xz,
-                            org.json
+                            org.json,
+                            io.confluent.kafka.schemaregistry.*,
+                            io.confluent.kafka.serializer.*,
+                            io.confluent.kafka.serializers.*,
+                            io.confluent.kafka.formatter.*,
+                            com.fasterxml.jackson.*,
                         </Private-Package>
                         <Export-Package>
                             org.apache.avro.*,
                             io.siddhi.extension.map.avro.*
                         </Export-Package>
                         <Import-Package>
-                            com.fasterxml.jackson.databind.*;version="${com.fasterxml.jackson.databind.range}",
-                            javax.annotation,
                             javax.xml,
                             org.osgi.framework.*;version="${org.osgi.framework.version.range}",
                             io.siddhi.annotation.*;version="${io.siddhi.version.range}",
                             io.siddhi.core.*;version="${io.siddhi.version.range}",
-                            io.siddhi.query.api.definition.*;version="${io.siddhi.version.range}"
+                            io.siddhi.query.api.definition.*;version="${io.siddhi.version.range}",
+                            *;resolution:=optional,
                     </Import-Package>
                         <Include-Resource>
                             META-INF=target/classes/META-INF
