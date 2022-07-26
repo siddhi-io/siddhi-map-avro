@@ -1,4 +1,4 @@
-# API Docs - v2.2.3
+# API Docs - v2.2.4
 
 !!! Info "Tested Siddhi Core version: *<a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/">5.1.21</a>*"
     It could also support other Siddhi Core minor versions.
@@ -86,7 +86,7 @@ define stream StockStream (symbol string, price float, volume long);
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 
 ```
-@source(..., @map(type="avro", schema.def="<STRING>", schema.registry="<STRING>", schema.id="<STRING>", fail.on.missing.attribute="<BOOL>", use.avro.deserializer="<BOOL>")
+@source(..., @map(type="avro", schema.def="<STRING>", schema.registry="<STRING>", schema.id="<STRING>", fail.on.missing.attribute="<BOOL>", use.avro.deserializer="<BOOL>", basic.auth.username="<STRING>", basic.auth.password="<STRING>", ssl.keystore.path="<STRING>", ssl.keystore.password="<STRING>", ssl.truststore.path="<STRING>", ssl.truststore.password="<STRING>")
 ```
 
 <span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -136,6 +136,54 @@ define stream StockStream (symbol string, price float, volume long);
         <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">Set this parameter to true when you use the class io.confluent.kafka.serializers.KafkaAvroDeserializer as the value deserializer when creating the Kafka consumer configs. When set to false, org.apache.kafka.common.serialization.ByteArrayDeserializer will be used.</p></td>
         <td style="vertical-align: top">false</td>
         <td style="vertical-align: top">BOOL</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">basic.auth.username</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">This specifies the username to authenticate if the schema registry is secured via basic authentication.</p></td>
+        <td style="vertical-align: top">EMPTY_STRING</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">basic.auth.password</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">This specifies the password to authenticate if the schema registry is secured via basic authentication.</p></td>
+        <td style="vertical-align: top">EMPTY_STRING</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">ssl.keystore.path</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">This specifies the SSL keystore path.</p></td>
+        <td style="vertical-align: top">EMPTY_STRING</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">ssl.keystore.password</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">This specifies the SSL keystore password.</p></td>
+        <td style="vertical-align: top">EMPTY_STRING</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">ssl.truststore.path</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">This specifies the SSL trust store path.</p></td>
+        <td style="vertical-align: top">EMPTY_STRING</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">ssl.truststore.password</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">This specifies the SSL trust store password.</p></td>
+        <td style="vertical-align: top">EMPTY_STRING</td>
+        <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
     </tr>
