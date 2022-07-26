@@ -114,7 +114,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#api-docs-v223" tabindex="1" class="md-skip">
+      <a href="#api-docs-v224" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -358,6 +358,18 @@
   
 </nav>
     
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../2.2.4/" title="2.2.4" class="md-nav__link">
+      2.2.4
+    </a>
   </li>
 
         
@@ -1417,7 +1429,7 @@
                   <a href="https://github.com/siddhi-io/siddhi-map-avro/blob/master/api/latest.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="api-docs-v223">API Docs - v2.2.3</h1>
+                <h1 id="api-docs-v224">API Docs - v2.2.4</h1>
 <div class="admonition info">
 <p class="admonition-title">Tested Siddhi Core version: <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/">5.1.21</a></em></p>
 <p>It could also support other Siddhi Core minor versions.</p>
@@ -1504,7 +1516,7 @@ define stream StockStream (symbol string, price float, volume long);
 <p style="word-wrap: break-word;margin: 0;">This extension is an Avro to Event input mapper. Transports that accept Avro messages can utilize this extension to convert the incoming Avro messages to Siddhi events.<br>&nbsp;The Avro schema to be used for creating Avro messages can be specified as a parameter in the stream definition.<br>&nbsp;If no Avro schema is specified, a flat avro schema of the 'record' type is generated with the stream attributes as schema fields.<br>The generated/specified Avro schema is used to convert Avro messages to Siddhi events.</p>
 <p></p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
-<pre><code>@source(..., @map(type=&quot;avro&quot;, schema.def=&quot;&lt;STRING&gt;&quot;, schema.registry=&quot;&lt;STRING&gt;&quot;, schema.id=&quot;&lt;STRING&gt;&quot;, fail.on.missing.attribute=&quot;&lt;BOOL&gt;&quot;, use.avro.deserializer=&quot;&lt;BOOL&gt;&quot;)
+<pre><code>@source(..., @map(type=&quot;avro&quot;, schema.def=&quot;&lt;STRING&gt;&quot;, schema.registry=&quot;&lt;STRING&gt;&quot;, schema.id=&quot;&lt;STRING&gt;&quot;, fail.on.missing.attribute=&quot;&lt;BOOL&gt;&quot;, use.avro.deserializer=&quot;&lt;BOOL&gt;&quot;, basic.auth.username=&quot;&lt;STRING&gt;&quot;, basic.auth.password=&quot;&lt;STRING&gt;&quot;, ssl.keystore.path=&quot;&lt;STRING&gt;&quot;, ssl.keystore.password=&quot;&lt;STRING&gt;&quot;, ssl.truststore.path=&quot;&lt;STRING&gt;&quot;, ssl.truststore.password=&quot;&lt;STRING&gt;&quot;)
 </code></pre>
 
 <p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -1554,6 +1566,54 @@ define stream StockStream (symbol string, price float, volume long);
         <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">Set this parameter to true when you use the class io.confluent.kafka.serializers.KafkaAvroDeserializer as the value deserializer when creating the Kafka consumer configs. When set to false, org.apache.kafka.common.serialization.ByteArrayDeserializer will be used.</p></td>
         <td style="vertical-align: top">false</td>
         <td style="vertical-align: top">BOOL</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">basic.auth.username</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">This specifies the username to authenticate if the schema registry is secured via basic authentication.</p></td>
+        <td style="vertical-align: top">EMPTY_STRING</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">basic.auth.password</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">This specifies the password to authenticate if the schema registry is secured via basic authentication.</p></td>
+        <td style="vertical-align: top">EMPTY_STRING</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">ssl.keystore.path</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">This specifies the SSL keystore path.</p></td>
+        <td style="vertical-align: top">EMPTY_STRING</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">ssl.keystore.password</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">This specifies the SSL keystore password.</p></td>
+        <td style="vertical-align: top">EMPTY_STRING</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">ssl.truststore.path</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">This specifies the SSL trust store path.</p></td>
+        <td style="vertical-align: top">EMPTY_STRING</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">ssl.truststore.password</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">This specifies the SSL trust store password.</p></td>
+        <td style="vertical-align: top">EMPTY_STRING</td>
+        <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
     </tr>
@@ -1629,13 +1689,13 @@ define stream UserStream (name string, age int );
           </a>
         
         
-          <a href="../2.2.3/" title="2.2.3" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../2.2.4/" title="2.2.4" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                2.2.3
+                2.2.4
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
