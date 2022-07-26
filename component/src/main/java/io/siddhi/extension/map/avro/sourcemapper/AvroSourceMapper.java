@@ -28,7 +28,9 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
 import com.jayway.jsonpath.ReadContext;
-import feign.FeignException;
+import io.confluent.kafka.schemaregistry.ParsedSchema;
+import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
+import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
@@ -46,7 +48,7 @@ import io.siddhi.core.util.error.handler.model.ErroneousEvent;
 import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.extension.map.avro.util.AvroMessageProcessor;
 import io.siddhi.extension.map.avro.util.schema.RecordSchema;
-import io.siddhi.extension.map.avro.util.schema.SchemaRegistryReader;
+import io.siddhi.extension.map.avro.util.schema.SchemaRegistryClientUtil;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.StreamDefinition;
 import net.minidev.json.JSONArray;
@@ -115,7 +117,39 @@ import java.util.List;
                                 "will be used.",
                         optional = true,
                         defaultValue = "false",
-                        type = {DataType.BOOL})
+                        type = {DataType.BOOL}),
+                @Parameter(name = "basic.auth.username",
+                        description = "This specifies the username to authenticate if the schema registry is secured " +
+                                "via basic authentication.",
+                        optional = true,
+                        defaultValue = "EMPTY_STRING",
+                        type = {DataType.STRING}),
+                @Parameter(name = "basic.auth.password",
+                        description = "This specifies the password to authenticate if the schema registry is secured " +
+                                "via basic authentication.",
+                        optional = true,
+                        defaultValue = "EMPTY_STRING",
+                        type = {DataType.STRING}),
+                @Parameter(name = "ssl.keystore.path",
+                        description = "This specifies the SSL keystore path.",
+                        optional = true,
+                        defaultValue = "EMPTY_STRING",
+                        type = {DataType.STRING}),
+                @Parameter(name = "ssl.keystore.password",
+                        description = "This specifies the SSL keystore password.",
+                        optional = true,
+                        defaultValue = "EMPTY_STRING",
+                        type = {DataType.STRING}),
+                @Parameter(name = "ssl.truststore.path",
+                        description = "This specifies the SSL trust store path.",
+                        optional = true,
+                        defaultValue = "EMPTY_STRING",
+                        type = {DataType.STRING}),
+                @Parameter(name = "ssl.truststore.password",
+                        description = "This specifies the SSL trust store password.",
+                        optional = true,
+                        defaultValue = "EMPTY_STRING",
+                        type = {DataType.STRING})
         },
         examples = {
                 @Example(
@@ -152,13 +186,18 @@ import java.util.List;
 public class AvroSourceMapper extends SourceMapper {
 
     private static final Logger log = LogManager.getLogger(AvroSourceMapper.class);
-    private static final String DEFAULT_AVRO_MAPPING_PREFIX = "schema";
-    private static final String SCHEMA_IDENTIFIER = "def";
+    private static final String SCHEMA_IDENTIFIER = "schema.def";
     private static final String DEFAULT_JSON_PATH = "$";
-    private static final String SCHEMA_REGISTRY = "registry";
-    private static final String SCHEMA_ID = "id";
+    private static final String SCHEMA_REGISTRY = "schema.registry";
+    private static final String SCHEMA_ID = "schema.id";
     private static final String FAIL_ON_MISSING_ATTRIBUTE_IDENTIFIER = "fail.on.missing.attribute";
     public static final String USE_AVRO_DESERIALIZER = "use.avro.deserializer";
+    public static final String BASIC_AUTH_USERNAME = "basic.auth.username";
+    public static final String BASIC_AUTH_PASSWORD = "basic.auth.password";
+    public static final String SSL_KEYSTORE_PATH = "ssl.keystore.path";
+    public static final String SSL_KEYSTORE_PASSWORD = "ssl.keystore.password";
+    public static final String SSL_TRUSTSTORE_PATH = "ssl.truststore.path";
+    public static final String SSL_TRUSTSTORE_PASSWORD = "ssl.truststore.password";
 
     private StreamDefinition streamDefinition;
     private List<Attribute> streamAttributes;
@@ -172,6 +211,14 @@ public class AvroSourceMapper extends SourceMapper {
     private Gson gson = new Gson();
     private Schema schema;
     private boolean useAvroDeserializer;
+    private String schemaRegistryUrl = null;
+    private String username = null;
+    private String password = null;
+    private String sslKeystorePath = null;
+    private String sslKeystorePassword = null;
+    private String sslTruststorePath = null;
+    private String sslTruststorePassword = null;
+    private CachedSchemaRegistryClient client = null;
 
     /**
      * Initialize the mapper and the mapping configurations.
@@ -189,8 +236,16 @@ public class AvroSourceMapper extends SourceMapper {
         this.streamDefinition = streamDefinition;
         this.streamAttributes = this.streamDefinition.getAttributeList();
         this.streamAttributesSize = this.streamDefinition.getAttributeList().size();
-        this.failOnMissingAttribute = Boolean.parseBoolean(optionHolder.
-                validateAndGetStaticValue(FAIL_ON_MISSING_ATTRIBUTE_IDENTIFIER, "true"));
+        this.failOnMissingAttribute = Boolean.parseBoolean(optionHolder
+                .validateAndGetStaticValue(FAIL_ON_MISSING_ATTRIBUTE_IDENTIFIER, "true"));
+        this.schemaRegistryUrl = optionHolder.validateAndGetStaticValue(SCHEMA_REGISTRY, null);
+        this.username = optionHolder.validateAndGetStaticValue(BASIC_AUTH_USERNAME, null);
+        this.password = optionHolder.validateAndGetStaticValue(BASIC_AUTH_PASSWORD, null);
+        this.sslKeystorePath = optionHolder.validateAndGetStaticValue(SSL_KEYSTORE_PATH, null);
+        this.sslKeystorePassword = optionHolder.validateAndGetStaticValue(SSL_KEYSTORE_PASSWORD, null);
+        this.sslTruststorePath = optionHolder.validateAndGetStaticValue(SSL_TRUSTSTORE_PATH, null);
+        this.sslTruststorePassword = optionHolder.validateAndGetStaticValue(SSL_TRUSTSTORE_PASSWORD, null);
+
         if (attributeMappingList != null && attributeMappingList.size() > 0) {
             this.mappingPositions = new MappingPositionData[attributeMappingList.size()];
             isCustomMappingEnabled = true;
@@ -201,25 +256,32 @@ public class AvroSourceMapper extends SourceMapper {
                 this.mappingPositions[i] = new MappingPositionData(position, attributeMapping.getMapping());
             }
         }
-        schema = getAvroSchema(optionHolder.validateAndGetStaticValue(DEFAULT_AVRO_MAPPING_PREFIX.concat(".").
-                        concat(SCHEMA_IDENTIFIER), null),
-                optionHolder.validateAndGetStaticValue(DEFAULT_AVRO_MAPPING_PREFIX.concat(".").
-                        concat(SCHEMA_REGISTRY), null),
-                optionHolder.validateAndGetStaticValue(DEFAULT_AVRO_MAPPING_PREFIX.concat(".").
-                        concat(SCHEMA_ID), null), streamDefinition.getId());
+
+        // build schema registry client if the registry url exists.
+        if (schemaRegistryUrl != null) {
+            this.client = SchemaRegistryClientUtil.buildSchemaRegistryClient(
+                    schemaRegistryUrl, username, password, sslKeystorePath, sslKeystorePassword, sslTruststorePath,
+                    sslTruststorePassword);
+        }
+
+        schema = getAvroSchema(optionHolder.validateAndGetStaticValue(SCHEMA_IDENTIFIER, null),
+                schemaRegistryUrl, optionHolder.validateAndGetStaticValue(SCHEMA_ID, null),
+                streamDefinition.getId());
         useAvroDeserializer = Boolean.parseBoolean(
                 optionHolder.validateAndGetStaticValue(USE_AVRO_DESERIALIZER, "false"));
     }
 
     private Schema getAvroSchema(String schemaDefinition, String schemaRegistryURL, String schemaID,
                                  String streamName) {
-        Schema schema;
+        Schema schema = null;
         try {
             if (schemaDefinition != null) {
                 schema = new Schema.Parser().parse(schemaDefinition);
             } else if (schemaRegistryURL != null) {
-                SchemaRegistryReader schemaRegistryReader = new SchemaRegistryReader();
-                schema = schemaRegistryReader.getSchemaFromID(schemaRegistryURL, schemaID);
+                ParsedSchema parsedSchema = this.client.getSchemaById(Integer.parseInt(schemaID));
+                if (parsedSchema != null) {
+                    schema = (Schema) parsedSchema.rawSchema();
+                }
             } else if (streamAttributes.size() > 0) {
                 log.warn("Schema Definition or Schema Registry is not specified in Stream. Hence generating " +
                         "schema from stream attributes.");
@@ -232,8 +294,12 @@ public class AvroSourceMapper extends SourceMapper {
         } catch (SchemaParseException e) {
             throw new SiddhiAppCreationException("Unable to parse Schema for stream:" + streamName + ". " +
                     e.getMessage());
-        } catch (FeignException e) {
-            throw new SiddhiAppCreationException("Error when retriving schema from schema registry. " + e.getMessage());
+        } catch (RestClientException e) {
+            throw new SiddhiAppCreationException("Error when retrieving schema from schema registry. "
+                    + e.getMessage());
+        } catch (IOException e) {
+            throw new SiddhiAppCreationException("Error when retrieving schema from schema registry. "
+                    + e.getMessage());
         }
         if (schema == null) {
             throw new SiddhiAppCreationException("Error when generating Avro Schema for stream: "
@@ -306,6 +372,13 @@ public class AvroSourceMapper extends SourceMapper {
                         "GenericRecord object to Json string for schema "
                         + schema.toString() + ". Reason: " + e.getMessage()));
             }
+        } else if (this.schemaRegistryUrl != null) {
+            // if schema registry url is specified, deserialize it via the avro deserializer
+            Object record = AvroMessageProcessor.deserializeByDeserializer(binaryEvent, schema, client);
+            if (record == null) {
+                return null;
+            }
+            avroMessage = record.toString();
         } else {
             Object record = AvroMessageProcessor.deserializeByteArray(binaryEvent, schema, failedEvents);
             if (record == null) {

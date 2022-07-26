@@ -19,7 +19,9 @@ package io.siddhi.extension.map.avro.sinkmapper;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import feign.FeignException;
+import io.confluent.kafka.schemaregistry.ParsedSchema;
+import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
+import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
@@ -34,7 +36,7 @@ import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.core.util.transport.TemplateBuilder;
 import io.siddhi.extension.map.avro.util.AvroMessageProcessor;
 import io.siddhi.extension.map.avro.util.schema.RecordSchema;
-import io.siddhi.extension.map.avro.util.schema.SchemaRegistryReader;
+import io.siddhi.extension.map.avro.util.schema.SchemaRegistryClientUtil;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.StreamDefinition;
 import org.apache.avro.Schema;
@@ -42,6 +44,7 @@ import org.apache.avro.SchemaParseException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
@@ -110,17 +113,32 @@ import java.util.Map;
 
 public class AvroSinkMapper extends SinkMapper {
     private static final Logger log = LogManager.getLogger(AvroSinkMapper.class);
-    private static final String DEFAULT_AVRO_MAPPING_PREFIX = "schema";
-    private static final String SCHEMA_IDENTIFIER = "def";
+    private static final String SCHEMA_IDENTIFIER = "schema.def";
     private static final String UNDEFINED = "undefined";
-    private static final String SCHEMA_REGISTRY = "registry";
-    private static final String SCHEMA_ID = "id";
+    private static final String SCHEMA_REGISTRY = "schema.registry";
+    private static final String SCHEMA_ID = "schema.id";
     public static final String USE_AVRO_SERIALIZER = "use.avro.serializer";
+
+    public static final String BASIC_AUTH_USERNAME = "basic.auth.username";
+    public static final String BASIC_AUTH_PASSWORD = "basic.auth.password";
+    public static final String SSL_KEYSTORE_PATH = "ssl.keystore.path";
+    public static final String SSL_KEYSTORE_PASSWORD = "ssl.keystore.password";
+    public static final String SSL_TRUSTSTORE_PATH = "ssl.truststore.path";
+    public static final String SSL_TRUSTSTORE_PASSWORD = "ssl.truststore.password";
 
     private String[] attributeNameArray;
     private Schema schema;
     private List<Attribute> attributeList;
     private boolean useAvroSerializer;
+
+    private String schemaRegistryUrl = null;
+    private String username = null;
+    private String password = null;
+    private String sslKeystorePath = null;
+    private String sslKeystorePassword = null;
+    private String sslTruststorePath = null;
+    private String sslTruststorePassword = null;
+    private CachedSchemaRegistryClient client = null;
 
     /**
      * Initialize the mapper and the mapping configurations.
@@ -145,25 +163,39 @@ public class AvroSinkMapper extends SinkMapper {
             throw new SiddhiAppCreationException("Avro sink-mapper does not support object @payload mappings, " +
                     "error at the mapper of '" + streamDefinition.getId() + "'");
         }
-        schema = getAvroSchema(optionHolder.validateAndGetStaticValue(DEFAULT_AVRO_MAPPING_PREFIX.concat(".").
-                        concat(SCHEMA_IDENTIFIER), null),
-                optionHolder.validateAndGetStaticValue(DEFAULT_AVRO_MAPPING_PREFIX.concat(".").
-                        concat(SCHEMA_REGISTRY), null),
-                optionHolder.validateAndGetStaticValue(DEFAULT_AVRO_MAPPING_PREFIX.concat(".").
-                        concat(SCHEMA_ID), null), streamDefinition.getId());
+        this.schemaRegistryUrl = optionHolder.validateAndGetStaticValue(SCHEMA_REGISTRY, null);
+        this.username = optionHolder.validateAndGetStaticValue(BASIC_AUTH_USERNAME, null);
+        this.password = optionHolder.validateAndGetStaticValue(BASIC_AUTH_PASSWORD, null);
+        this.sslKeystorePath = optionHolder.validateAndGetStaticValue(SSL_KEYSTORE_PATH, null);
+        this.sslKeystorePassword = optionHolder.validateAndGetStaticValue(SSL_KEYSTORE_PASSWORD, null);
+        this.sslTruststorePath = optionHolder.validateAndGetStaticValue(SSL_TRUSTSTORE_PATH, null);
+        this.sslTruststorePassword = optionHolder.validateAndGetStaticValue(SSL_TRUSTSTORE_PASSWORD, null);
+
+        // build schema registry client if the registry url exists.
+        if (schemaRegistryUrl != null) {
+            this.client = SchemaRegistryClientUtil.buildSchemaRegistryClient(
+                    schemaRegistryUrl, username, password, sslKeystorePath, sslKeystorePassword, sslTruststorePath,
+                    sslTruststorePassword);
+        }
+
+        schema = getAvroSchema(optionHolder.validateAndGetStaticValue(SCHEMA_IDENTIFIER, null),
+                schemaRegistryUrl, optionHolder.validateAndGetStaticValue(SCHEMA_ID, null),
+                streamDefinition.getId());
         useAvroSerializer = Boolean.parseBoolean(
                 optionHolder.validateAndGetStaticValue(USE_AVRO_SERIALIZER, "false"));
     }
 
     private Schema getAvroSchema(String schemaDefinition, String schemaRegistryURL, String schemaID,
                                  String streamName) {
-        Schema returnSchema;
+        Schema returnSchema = null;
         try {
             if (schemaDefinition != null) {
                 returnSchema = new Schema.Parser().parse(schemaDefinition);
             } else if (schemaRegistryURL != null) {
-                SchemaRegistryReader schemaRegistryReader = new SchemaRegistryReader();
-                returnSchema = schemaRegistryReader.getSchemaFromID(schemaRegistryURL, schemaID);
+                ParsedSchema parsedSchema = this.client.getSchemaById(Integer.parseInt(schemaID));
+                if (parsedSchema != null) {
+                    returnSchema = (Schema) parsedSchema.rawSchema();
+                }
             } else if (attributeList.size() > 0) {
                 log.warn("Schema Definition and Schema Registry is not specified in Stream. Hence generating " +
                         "schema from stream attributes.");
@@ -176,9 +208,12 @@ public class AvroSinkMapper extends SinkMapper {
         } catch (SchemaParseException e) {
             throw new SiddhiAppCreationException("Unable to parse Schema for stream:" + streamName + ". " +
                     e.getMessage());
-        } catch (FeignException e) {
-            throw new SiddhiAppCreationException(
-                    "Error when retrieving schema from schema registry. " + e.getMessage());
+        } catch (RestClientException e) {
+            throw new SiddhiAppCreationException("Error when retrieving schema from schema registry. "
+                    + e.getMessage());
+        } catch (IOException e) {
+            throw new SiddhiAppCreationException("Error when retrieving schema from schema registry. "
+                    + e.getMessage());
         }
         if (returnSchema == null) {
             throw new SiddhiAppCreationException("Error when generating Avro Schema for stream: "

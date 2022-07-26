@@ -295,7 +295,7 @@ public class AvroSourceMapperTestCase {
         InMemoryBroker.publish("user", ByteBuffer.wrap(data));
 
         AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
-                get("UnitTestAppender")).getMessages().contains("Error occured when deserializing avro " +
+                get("UnitTestAppender")).getMessages().contains("Error occurred when deserializing avro " +
                 "byte stream " +
                 "conforming to schema {\"type\":\"record\",\"name\":\"user\",\"namespace\":\"avro.user\"," +
                 "\"fields\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"favorite_number\",\"type\":" +
