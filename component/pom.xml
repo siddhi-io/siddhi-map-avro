@@ -195,9 +195,6 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
-                            com.jayway.jsonpath.*,
-                            net.minidev.*,
-                            org.objectweb.asm.*,
                             avro.shaded.com.google.common.*,
                             com.thoughtworks.paranamer.*,
                             org.apache.commons.compress.utils.*,
@@ -225,6 +222,8 @@
                             io.siddhi.annotation.*;version="${io.siddhi.version.range}",
                             io.siddhi.core.*;version="${io.siddhi.version.range}",
                             io.siddhi.query.api.definition.*;version="${io.siddhi.version.range}",
+                            com.jayway.jsonpath.*;version="${com.jayway.jsonpath.version.range}",
+                            net.minidev.*;version="${net.minidev.json-smart.version.range}",
                             *;resolution:=optional,
                     </Import-Package>
                         <Include-Resource>
