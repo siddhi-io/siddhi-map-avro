@@ -328,7 +328,7 @@
         <tapestry.json.orbit.version>5.4.1.wso2v1</tapestry.json.orbit.version>
         <net.minidev.version>2.5.0</net.minidev.version>
         <jacoco.version>0.7.9</jacoco.version>
-        <avro.version>1.8.2</avro.version>
+        <avro.version>1.11.4</avro.version>
         <feign.version>9.5.0</feign.version>
         <okhttp.version>3.6.0</okhttp.version>
         <okio.version>1.11.0</okio.version>
