@@ -210,7 +210,6 @@
                             io.confluent.kafka.serializer.*,
                             io.confluent.kafka.serializers.*,
                             io.confluent.kafka.formatter.*,
-                            com.fasterxml.jackson.*,
                         </Private-Package>
                         <Export-Package>
                             org.apache.avro.*,
@@ -288,4 +287,3 @@
         <mavan.findbugsplugin.exclude.file>../findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
     </properties>
 </project>
-
