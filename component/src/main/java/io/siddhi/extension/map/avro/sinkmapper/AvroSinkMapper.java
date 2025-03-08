@@ -264,14 +264,13 @@ public class AvroSinkMapper extends SinkMapper {
                 convertedEvent = AvroMessageProcessor.serializeAvroMessage(
                         jsonEvent.toString(), schema, useAvroSerializer);
             } catch (Throwable t) {
-                log.error("Error when converting siddhi event: " + Arrays.toString(event.getData()) +
-                        " to Avro message of schema: " + schema + "." + t.getMessage() +
-                        ". Hence dropping the event.");
+                log.error("Error when converting siddhi event: {} to Avro message of schema: {}.{}. Hence " +
+                                "dropping the event.", Arrays.toString(event.getData()), schema, t.getMessage());
             }
             return convertedEvent;
         } else {
-            log.error("Invalid object type. " + eventObj.toString() + " of type " + eventObj.getClass().getName() +
-                    " cannot be converted to an Avro Message");
+            log.error("Invalid object type. {} of type {} cannot be converted to an Avro Message", eventObj.toString(),
+                    eventObj.getClass().getName());
             return null;
         }
     }
@@ -285,9 +284,8 @@ public class AvroSinkMapper extends SinkMapper {
         try {
             return AvroMessageProcessor.serializeAvroMessage(jsonString, schema, useAvroSerializer);
         } catch (Throwable t) {
-            log.error("Error when converting siddhi event: " + Arrays.toString(event.getData()) +
-                    " to Avro message of schema: " + schema + "." + t.getMessage() +
-                    ". Hence dropping the event.");
+            log.error("Error when converting siddhi event: {} to Avro message of schema: {}.{}. Hence dropping the " +
+                            "event.", Arrays.toString(event.getData()), schema, t.getMessage());
             return null;
         }
     }

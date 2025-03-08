@@ -83,8 +83,8 @@ public class RecordSchema {
                 dataType = Schema.Type.LONG;
                 break;
             default:
-                log.error("Stream attribute: " + name + " has data type: " + type.toString() +
-                        " which is not supported by avro schema generation ");
+                log.error("Stream attribute: {} has data type: {} which is not supported by avro schema generation ",
+                        name, type.toString());
                 return null;
         }
         return dataType.toString().toLowerCase();

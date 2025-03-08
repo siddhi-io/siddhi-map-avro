@@ -20,7 +20,7 @@
     <parent>
         <artifactId>wso2</artifactId>
         <groupId>org.wso2</groupId>
-        <version>5</version>
+        <version>5.3</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
@@ -314,6 +314,13 @@
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <configuration>
+                    <excludeFilterFile>${maven.findbugsplugin.version.exclude}</excludeFilterFile>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <properties>
@@ -349,7 +356,7 @@
         <com.jayway.jsonpath.version.range>[2.2.0,3.0.0)</com.jayway.jsonpath.version.range>
         <net.minidev.json-smart.version.range>[2.5.0,3.0.0)</net.minidev.json-smart.version.range>
 
-        <mavan.findbugsplugin.exclude.file>findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
+        <maven.findbugsplugin.version.exclude>findbugs-exclude.xml</maven.findbugsplugin.version.exclude>
         <mavan.checkstyle.suppression.file>checkstyle-suppressions.xml</mavan.checkstyle.suppression.file>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>

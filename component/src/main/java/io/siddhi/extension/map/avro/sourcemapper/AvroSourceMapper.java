@@ -323,8 +323,7 @@ public class AvroSourceMapper extends SourceMapper {
         try {
             convertedEvent = convertToEvents(eventObject, failedEvents);
         } catch (Throwable t) {
-            log.error("Exception occurred when converting Avro message: " + eventObject.toString() +
-                    " to Siddhi Event", t);
+            log.error("Exception occurred when converting Avro message: {} to Siddhi Event", eventObject.toString(), t);
             failedEvents.add(new ErroneousEvent(eventObject,
                     "Exception occurred when converting Avro message: " + eventObject.toString() +
                             " to Siddhi Event"));
@@ -354,8 +353,8 @@ public class AvroSourceMapper extends SourceMapper {
         } else if (eventObject instanceof ByteBuffer) {
             binaryEvent = ((ByteBuffer) eventObject).array();
         } else if (!(eventObject instanceof GenericRecord)) {
-            log.error("Event object is invalid. Expected byte Array, GenericRecord or ByteBuffer , but found "
-                    + eventObject.getClass().getCanonicalName());
+            log.error("Event object is invalid. Expected byte Array, GenericRecord or ByteBuffer , but found {}",
+                    eventObject.getClass().getCanonicalName());
             failedEvents.add(new ErroneousEvent(eventObject,
                     "Event object is invalid. Expected byte Array or ByteBuffer, but found "
                             + eventObject.getClass().getCanonicalName()));
@@ -366,8 +365,8 @@ public class AvroSourceMapper extends SourceMapper {
             try {
                 avroMessage = toJsonString(schema, (GenericRecord) eventObject);
             } catch (IOException e) {
-                log.error("Failed to convert received GenericRecord object to Json string for schema "
-                        + schema.toString() + ". Reason: " + e.getMessage());
+                log.error("Failed to convert received GenericRecord object to Json string for schema {}. Reason: {}",
+                        schema.toString(), e.getMessage());
                 failedEvents.add(new ErroneousEvent(eventObject, "Failed to convert received " +
                         "GenericRecord object to Json string for schema "
                         + schema.toString() + ". Reason: " + e.getMessage()));
@@ -388,7 +387,7 @@ public class AvroSourceMapper extends SourceMapper {
         }
 
         if (avroMessage != null && !isJsonValid(avroMessage)) {
-            log.error("Invalid Avro message :" + avroMessage + " for schema " + schema.toString());
+            log.error("Invalid Avro message :{} for schema {}", avroMessage, schema.toString());
             failedEvents.add(new ErroneousEvent(eventObject,
                     "Invalid Avro message :" + avroMessage + " for schema " + schema.toString()));
         } else {
@@ -425,7 +424,7 @@ public class AvroSourceMapper extends SourceMapper {
                         "Avro mapping. Number of attributes in avro message:" + jsonEvent.size() + " is less  " +
                         "than the number of attributes in stream " + streamDefinition.getId() + ":" +
                         streamAttributes.size();
-                log.error(errStr);
+                log.error("{}", errStr);
                 failedEvents.add(new ErroneousEvent(eventObject, errStr));
             } else {
                 Event[] event = convertToSingleEventForDefaultMapping(jsonEvent.toString());
@@ -454,7 +453,7 @@ public class AvroSourceMapper extends SourceMapper {
         } catch (IOException e) {
             String errStr = "Initializing a parser failed for the event string."
                     + avroMessage;
-            log.error(errStr);
+            log.error("{}", errStr);
             throw new MappingFailedException(errStr, e);
         }
 
@@ -473,7 +472,7 @@ public class AvroSourceMapper extends SourceMapper {
                                 "Hence dropping the message. Check whether the avro message is in a " +
                                 "orrect format for default mapping."
                                 + avroMessage;
-                        log.error(errStr);
+                        log.error("{}", errStr);
                         throw new MappingFailedException(errStr);
                     }
                     jsonToken = parser.nextToken();
@@ -490,7 +489,7 @@ public class AvroSourceMapper extends SourceMapper {
                                     String errStr = "Avro message " + avroMessage + "contains incompatible attribute " +
                                             "types and values. Value " + parser.getText() + " is not compatible with " +
                                             "type BOOL. Hence dropping the message.";
-                                    log.error(errStr);
+                                    log.error("{}", errStr);
                                     throw new MappingFailedException(errStr);
                                 }
                                 break;
@@ -501,7 +500,7 @@ public class AvroSourceMapper extends SourceMapper {
                                     String errStr = "Avro message " + avroMessage + "contains incompatible attribute " +
                                             "types and values. Value " + parser.getText() + " is not compatible with " +
                                             "type INT. Hence dropping the message.";
-                                    log.error(errStr);
+                                    log.error("{}", errStr);
                                     throw new MappingFailedException(errStr);
                                 }
                                 break;
@@ -512,7 +511,7 @@ public class AvroSourceMapper extends SourceMapper {
                                     String errStr = "Avro message " + avroMessage + "contains incompatible attribute " +
                                             "types and values. Value " + parser.getText() + " is not compatible with " +
                                             "type DOUBLE. Hence dropping the message.";
-                                    log.error(errStr);
+                                    log.error("{}", errStr);
                                     throw new MappingFailedException(errStr);
                                 }
                                 break;
@@ -528,7 +527,7 @@ public class AvroSourceMapper extends SourceMapper {
                                     String errStr = "Avro message " + avroMessage + "contains incompatible attribute " +
                                             "types and values. Value " + parser.getText() + " is not compatible with " +
                                             "type FLOAT. Hence dropping the message.";
-                                    log.error(errStr);
+                                    log.error("{}", errStr);
                                     throw new MappingFailedException(errStr);
                                 }
                                 break;
@@ -539,7 +538,7 @@ public class AvroSourceMapper extends SourceMapper {
                                     String errStr = "Avro message " + avroMessage + "contains incompatible attribute " +
                                             "types and values. Value " + parser.getText() + " is not compatible with " +
                                             "type LONG. Hence dropping the message.";
-                                    log.error(errStr);
+                                    log.error("{}", errStr);
                                     throw new MappingFailedException(errStr);
                                 }
                                 break;
@@ -576,7 +575,7 @@ public class AvroSourceMapper extends SourceMapper {
                 }
             } catch (IOException e) {
                 String errStr = "Avro message " + avroMessage + " cannot be converted to siddhi event.";
-                log.error(errStr, e);
+                log.error("{}", errStr, e);
                 throw new MappingFailedException(errStr, e);
             }
         }
@@ -648,13 +647,13 @@ public class AvroSourceMapper extends SourceMapper {
                                     break;
                                 default:
                                     data[position] = null;
-                                    log.warn(parser.nextToken() + " is not a valid data type for event data value. " +
-                                            " Hence event data value is set to null");
+                                    log.warn("{} is not a valid data type for event data value.  Hence event data " +
+                                                    "value is set to null", parser.nextToken());
                             }
                         } catch (IOException e) {
                             String errStr = "Initializing a parser failed for the event string." +
                                     mappedValue.toString();
-                            log.error(errStr, e);
+                            log.error("{}", errStr, e);
                             throw new MappingFailedException(errStr, e);
                         }
                     } else {
@@ -664,8 +663,8 @@ public class AvroSourceMapper extends SourceMapper {
                 }
             } catch (PathNotFoundException e) {
                 if (failOnMissingAttribute) {
-                    log.error("Json message " + childObject.toString() +
-                            "contains missing attributes. Hence dropping the message.");
+                    log.error("Json message {}contains missing attributes. Hence dropping the message.",
+                            childObject.toString());
                     return null;
                 }
                 data[position] = null;
