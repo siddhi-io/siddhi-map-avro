@@ -62,8 +62,8 @@ public class AvroMessageProcessor {
             output.close();
             return ByteBuffer.wrap(output.toByteArray());
         } catch (IOException e) {
-            log.error("IOException occurred when serializing event: '" + jsonString +
-                    "' to avro message of schema: '" + schema.toString() + "'. Reason: " + e.getMessage());
+            log.error("IOException occurred when serializing event: '{}' to avro message of schema: '{}'. Reason: {}",
+                    jsonString, schema.toString(), e.getMessage());
             return null;
         }
     }
@@ -75,8 +75,8 @@ public class AvroMessageProcessor {
             Object record = reader.read(null, decoder);
             return record;
         } catch (IOException e) {
-            log.error("Error occurred when deserializing avro byte stream conforming " +
-                    "to schema " + schema.toString() + ". Hence dropping the event. Reason: " + e.getMessage());
+            log.error("Error occurred when deserializing avro byte stream conforming to schema {}. Hence dropping " +
+                    "the event. Reason: {}", schema.toString(), e.getMessage());
             failedEvents.add(new ErroneousEvent(data,
                     "Error occurred when deserializing avro byte stream conforming " +
                             "to schema " + schema.toString() + ". Hence dropping the event."));
