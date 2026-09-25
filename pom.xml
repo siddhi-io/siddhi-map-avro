@@ -91,6 +91,11 @@
                 </exclusions>
             </dependency>
             <dependency>
+                <groupId>org.xerial.snappy</groupId>
+                <artifactId>snappy-java</artifactId>
+                <version>${snappy-java.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.jayway.jsonpath</groupId>
                 <artifactId>json-path</artifactId>
                 <version>${jsonpath.version}</version>
@@ -336,6 +341,7 @@
         <net.minidev.version>2.5.0</net.minidev.version>
         <jacoco.version>0.7.9</jacoco.version>
         <avro.version>1.8.2</avro.version>
+        <snappy-java.version>1.1.10.7</snappy-java.version>
         <feign.version>9.5.0</feign.version>
         <okhttp.version>3.6.0</okhttp.version>
         <okio.version>1.11.0</okio.version>
