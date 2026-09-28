@@ -17,7 +17,7 @@
  */
 package io.siddhi.extension.map.avro.util.schema;
 
-import com.google.gson.internal.LinkedTreeMap;
+import com.google.gson.JsonObject;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
@@ -31,5 +31,5 @@ public interface SchemaRegistryClient {
 
     @RequestLine("GET /schemas/ids/{id}")
     @Headers("Content-Type: application/json")
-    LinkedTreeMap findByID(@Param("id") String id);
+    JsonObject findByID(@Param("id") String id);
 }
