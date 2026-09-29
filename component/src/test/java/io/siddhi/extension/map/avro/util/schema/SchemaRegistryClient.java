@@ -17,19 +17,12 @@
  */
 package io.siddhi.extension.map.avro.util.schema;
 
-import com.google.gson.JsonObject;
-import feign.Headers;
-import feign.Param;
 import feign.RequestLine;
 
 /**
- * This interface defines the http calls to schema registry.
+ * Checks whether a schema registry is reachable.
  */
 public interface SchemaRegistryClient {
     @RequestLine("GET")
     Object connect();
-
-    @RequestLine("GET /schemas/ids/{id}")
-    @Headers("Content-Type: application/json")
-    JsonObject findByID(@Param("id") String id);
 }
