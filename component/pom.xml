@@ -51,6 +51,10 @@
             <artifactId>avro</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.xerial.snappy</groupId>
+            <artifactId>snappy-java</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
         </dependency>
@@ -195,16 +199,11 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
-                            avro.shaded.com.google.common.*,
-                            com.thoughtworks.paranamer.*,
-                            org.apache.commons.compress.utils.*,
-                            org.apache.commons.compress.compressors.*,
+                            org.apache.commons.compress.*,
                             org.xerial.snappy.*,
-                            org.apache.commons.compress.archivers.*,
                             feign.*,
                             okhttp3.*,
                             okio.*,
-                            org.tukaani.xz,
                             org.json,
                             io.confluent.kafka.schemaregistry.*,
                             io.confluent.kafka.serializer.*,
@@ -223,6 +222,7 @@
                             io.siddhi.query.api.definition.*;version="${io.siddhi.version.range}",
                             com.jayway.jsonpath.*;version="${com.jayway.jsonpath.version.range}",
                             net.minidev.*;version="${net.minidev.json-smart.version.range}",
+                            org.apache.commons.io.*;version="${commons-io.version.range}";resolution:=optional,
                             *;resolution:=optional,
                     </Import-Package>
                         <Include-Resource>
